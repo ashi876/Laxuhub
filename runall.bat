@@ -71,15 +71,22 @@ set "PYTHON_HOME=!dir[%choice%]!"
 set "mybin=%~dp0mybin"
 set "ffmpeg_path=D:\serve\ffmpeg"
 
+if exist "%ffmpeg_path%" (
+    echo ffmpeg目录为%ffmpeg_path%
+) else (
+    echo ffmpeg目录不存在,不使用可无视
+)
+
 :: 设置PATH环境变量
 set "PATH=%ffmpeg_path%;%PYTHON_HOME%;%PYTHON_HOME%\Scripts;%mybin%;%PATH%"
 
 :: 调用镜像源设置脚本（如果存在）
 if exist "%mybin%\镜像源.bat" (
-	echoc 9
     call "%mybin%\镜像源.bat"
-	echoc 10
+) else (
+    echo "镜像源.bat"文件不存在，使用默认源
 )
+
 
 :: 设置clink历史命令存放目录
 set "CLINK_PROFILE=%~dp0\mybin\temp"
