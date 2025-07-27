@@ -13,7 +13,7 @@ https://github.com/ashi876/PortablePythonHub
 
 #### **目录结构说明**
 
-	├── PythonXXX\        # 绿色版 Python 主程序 (官网提取版，仅含 pip+tcl)
+	├── PythonXXX\        # 绿色版 Python 主程序 (官网提取x64版，仅含 pip+tcl)
 	├── mybin\            # 扩展工具集
 	│   ├── pip重置.bat        # 修复 pip 路径 + 设置国内镜像源
 	│   ├── pip安全更新.bat     # 通过 get-pip.py 安全更新
