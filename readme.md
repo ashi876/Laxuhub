@@ -28,7 +28,7 @@
 第一步：初始化环境
 
     双击运行 runall.bat
-        自动扫描 Python* 目录（如 Python38, Python310）
+        自动扫描 Python* 目录（如 Python38, Python310）单个版本时直接进入
         多版本时显示选择菜单：
 
      检测到的Python目录列表：
@@ -39,7 +39,7 @@
 第二步：首次运行必做
 
     重要提示：首次运行需在 runall.bat 窗口内执行：
-    mybin\pip重置.bat    # 修复绿色版 pip 功能
+    pip重置.bat    # 修复绿色版 pip 功能
   
 
 第三步：常用操作
