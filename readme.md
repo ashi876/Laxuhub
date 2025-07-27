@@ -22,8 +22,7 @@ https://github.com/ashi876/PortablePythonHub
 	│   └── upx.exe        # PyInstaller 压缩工具
 	├── py\               # 测试脚本目录
 	│   └── Python库批量安装.py  # 一键安装常用库
-	├── runall.bat         # 主入口脚本 (本文档解析对象)
-	└── runpythonXXX.bat   # 各版本 Python 独立启动器
+	└── runall.bat         # 主入口脚本 (本文档解析对象)
 
 使用流程
 第一步：初始化环境
