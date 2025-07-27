@@ -12,17 +12,18 @@ https://github.com/ashi876/PortablePythonHub
 ---
 
 #### **目录结构说明**
-├── PythonXXX\        # 绿色版 Python 主程序 (官网提取版，仅含 pip+tcl)
-├── mybin\            # 扩展工具集
-│   ├── pip重置.bat        # 修复 pip 路径 + 设置国内镜像源
-│   ├── pip安全更新.bat     # 通过 get-pip.py 安全更新
-│   ├── clink\         # CMD 增强工具 (历史记录/补全/复制粘贴)
-│   ├── gsudo.exe      # 脚本提权工具
-│   └── upx.exe        # PyInstaller 压缩工具
-├── py\               # 测试脚本目录
-│   └── Python库批量安装.py  # 一键安装常用库
-├── runall.bat         # 主入口脚本 (本文档解析对象)
-└── runpythonXXX.bat   # 各版本 Python 独立启动器
+
+	├── PythonXXX\        # 绿色版 Python 主程序 (官网提取版，仅含 pip+tcl)
+	├── mybin\            # 扩展工具集
+	│   ├── pip重置.bat        # 修复 pip 路径 + 设置国内镜像源
+	│   ├── pip安全更新.bat     # 通过 get-pip.py 安全更新
+	│   ├── clink\         # CMD 增强工具 (历史记录/补全/复制粘贴)
+	│   ├── gsudo.exe      # 脚本提权工具
+	│   └── upx.exe        # PyInstaller 压缩工具
+	├── py\               # 测试脚本目录
+	│   └── Python库批量安装.py  # 一键安装常用库
+	├── runall.bat         # 主入口脚本 (本文档解析对象)
+	└── runpythonXXX.bat   # 各版本 Python 独立启动器
 
 使用流程
 第一步：初始化环境
