@@ -1,7 +1,7 @@
 ### PortablePythonHub 使用指南  
-（绿色 Python 环境集合包）
-https://github.com/ashi876/PortablePythonHub
----
+（绿色 Python 多版本集合包）
+ https://github.com/ashi876/PortablePythonHub
+ 作者:千城真人 b站碎辰
 
 #### **核心功能**  
 通过 `runall.bat` 自动检测并管理多个绿色版 Python 环境，实现：  
