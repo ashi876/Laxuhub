@@ -1,0 +1,5 @@
+# 强制所有 .bat 文件使用 CRLF 换行符
+*.bat text eol=crlf
+
+# 额外保护批处理文件不被修改
+*.bat -text diff
