@@ -3,3 +3,6 @@
 
 # 额外保护批处理文件不被修改
 *.bat -text diff
+
+# 完全禁止 Git 修改批处理文件
+*.bat binary
