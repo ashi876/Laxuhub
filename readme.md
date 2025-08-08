@@ -15,7 +15,7 @@
 
 	├── PythonXXX\        # 绿色版 Python 主程序 (官网提取x64版，仅含 pip+tcl)
 	├── mybin\            # 扩展工具集
-	│   ├── pip重置.bat        # 修复 pip 路径 + 设置国内镜像源
+	│   ├── pip重置.bat        # 修复 pip 路径
 	│   ├── pip安全更新.bat     # 通过 get-pip.py 安全更新
 	│   ├── clink\         # CMD 增强工具 (历史记录/补全/复制粘贴)
 	│   ├── gsudo.exe      # 脚本提权工具
