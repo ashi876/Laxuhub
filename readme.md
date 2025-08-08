@@ -1,5 +1,5 @@
 ### PortablePythonHub 使用指南  
-（绿色 Python 多版本集合包）
+（win平台绿色 Python 多版本集合包）
  https://github.com/ashi876/PortablePythonHub
  作者:千城真人 b站_碎辰
 
