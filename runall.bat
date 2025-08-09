@@ -115,7 +115,7 @@ cd /d %mydesk%
 
 pip -V
 if !errorlevel! equ 1 (
-    echoc 12 检测到pip命令错误,运行[pip重置.bat]或[pip安全更新.bat]
+    echoc 12 检测到pip命令错误,运行[pipreset.bat]或[pipsafeup.bat]
 )
 
 :: 启动Clink
