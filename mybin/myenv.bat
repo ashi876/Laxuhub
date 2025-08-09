@@ -50,7 +50,7 @@ echo set path=%%path%%;%mybin%>>%cd%\%env_name%.bat
 echo=>>%cd%\%env_name%.bat
 echo cd /d %cd%\%%tmp_name%%>>%cd%\%env_name%.bat
 echo call Scripts\activate>>%cd%\%env_name%.bat
-echo call 镜像源.bat>>%cd%\%env_name%.bat
+echo call cn_mirror.bat>>%cd%\%env_name%.bat
 echo=>>%cd%\%env_name%.bat
 echo echo 使用%%tmp_name%% 虚拟环境>>%cd%\%env_name%.bat
 echo python -V>>%cd%\%env_name%.bat
