@@ -84,23 +84,7 @@ echo.
 :: 配置国内镜像源（原版配置）
 :: ================================================
 
-REM set "PIP_CONFIG=%APPDATA%\pip\pip.ini"
-REM if not exist "%APPDATA%\pip\" mkdir "%APPDATA%\pip"
-
-REM set "TEMP_CONFIG=%TEMP%\pip_temp_%RANDOM%.ini"
-REM (
-    REM echo [global]
-    REM echo index-url = https://pypi.tuna.tsinghua.edu.cn/simple/
-    REM echo extra-index-url = https://mirrors.aliyun.com/pypi/simple/ https://pypi.mirrors.ustc.edu.cn/simple/
-    REM echo trusted-host = pypi.tuna.tsinghua.edu.cn mirrors.aliyun.com pypi.mirrors.ustc.edu.cn
-    REM echo timeout = 120
-REM ) > "%TEMP_CONFIG%"
-
-REM move /Y "%TEMP_CONFIG%" "%PIP_CONFIG%" > nul
-REM echo 镜像源配置文件位置: %PIP_CONFIG%
-REM echo 内容:
-REM type "%PIP_CONFIG%"
-REM echo.
+REM 镜像源配置已由 runall.bat 调用 cn_mirror.bat
 
 :: ================================================
 :: 验证结果
