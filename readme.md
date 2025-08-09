@@ -15,6 +15,7 @@
 
 	├── PythonXXX\        # 绿色版 Python 主程序 (官网提取x64版，仅含 pip+tcl)
 	├── mybin\            # 扩展工具集
+ 	│   ├── clink\        # clink命令行增强插件所在目录
 	│   ├── pipreset.bat        # 修复 pip 路径
 	│   ├── pipsafeup.bat     # 通过 get-pip.py 安全更新
 	│   ├── clink\         # CMD 增强工具 (历史记录/补全/复制粘贴)
@@ -60,5 +61,5 @@
 
 进阶技巧
 
-    自定义工具集成
-    将任何 .exe 或脚本放入 mybin\，重启 runall.bat 后可直接调用
+    自定义工具集成: 将任何 .exe 或脚本放入 mybin\，重启 runall.bat 后可直接调用
+	多版本调用例:复制python312  为python312_project,就可以得到一个不是虚拟环境的原生“虚拟环境”，兼容性更好
