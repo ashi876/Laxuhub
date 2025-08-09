@@ -81,10 +81,10 @@ if exist "%ffmpeg_path%" (
 set "PATH=%ffmpeg_path%;%PYTHON_HOME%;%PYTHON_HOME%\Scripts;%mybin%;%PATH%"
 
 :: 调用镜像源设置脚本（如果存在）
-if exist "%mybin%\镜像源.bat" (
-    call "%mybin%\镜像源.bat"
+if exist "%mybin%\cn_mirror.bat" (
+    call "%mybin%\cn_mirror.bat"
 ) else (
-    echo "镜像源.bat"文件不存在，使用默认源
+    echo "cn_mirror.bat"文件不存在，使用默认源
 )
 
 

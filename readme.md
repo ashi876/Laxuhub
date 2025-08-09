@@ -15,8 +15,8 @@
 
 	├── PythonXXX\        # 绿色版 Python 主程序 (官网提取x64版，仅含 pip+tcl)
 	├── mybin\            # 扩展工具集
-	│   ├── pip重置.bat        # 修复 pip 路径
-	│   ├── pip安全更新.bat     # 通过 get-pip.py 安全更新
+	│   ├── pipreset.bat        # 修复 pip 路径
+	│   ├── pipsafeup.bat     # 通过 get-pip.py 安全更新
 	│   ├── clink\         # CMD 增强工具 (历史记录/补全/复制粘贴)
 	│   ├── gsudo.exe      # 脚本提权工具
 	│   └── upx.exe        # PyInstaller 压缩工具
@@ -39,7 +39,7 @@
 第二步：首次运行必做
 
     重要提示：首次运行需在 runall.bat 窗口内执行：
-    pip重置.bat    # 修复绿色版 pip 功能
+    pipreset.bat    # 修复绿色版 pip 功能
   
 
 第三步：常用操作
@@ -48,13 +48,13 @@
     cd /d %mypy%	进入脚本目录 .\py\	运行 Python库批量安装.py
     cd /d %mydesk%	跳转桌面目录	快速访问桌面文件
     myenv.bat [名称]	创建虚拟环境 (默认 myenv)	myenv.bat django_project
-    pip安全更新.bat	安全升级 pip	解决旧版本兼容问题
+    pipsafeup.bat	安全升级 pip	解决旧版本兼容问题
 
 错误处理方案
 
     现象	解决方案
     未找到Python目录	确认存在 PythonXXX 文件夹
-    pip 不可用	首次运行必须执行 pip重置.bat
+    pip 不可用	首次运行必须执行 pipreset.bat
     python.exe 缺失	检查 Python 目录完整性
     路径含中文/空格	移动项目到纯英文路径
 
