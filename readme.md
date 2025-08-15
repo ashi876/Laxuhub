@@ -17,6 +17,8 @@
 	├── mybin\            # 扩展工具集
 	│   ├── pipreset.bat        # 修复 pip 路径
 	│   ├── pipsafeup.bat     # 通过 get-pip.py 安全更新
+	│   ├── setup_vstools.bat        # 安装vc2022编译器
+	│   ├── vsenv.bat     # 输入此命令可调用vc2022环境
 	│   ├── clink\         # CMD 增强工具 (历史记录/补全/复制粘贴)
 	│   ├── gsudo.exe      # 脚本提权工具
 	│   └── upx.exe        # PyInstaller 压缩工具
