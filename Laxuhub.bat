@@ -220,6 +220,12 @@ echo.
 echo ================================
 echo    Æô¶¯Clink»·¾³...
 echo ================================
+if exist "%1" (
+    cd /d "%1"
+) else (
+    cd /d "%USERPROFILE%\Desktop"
+)
+
 cmd /k "clink.bat inject --quiet"
 
 goto main
