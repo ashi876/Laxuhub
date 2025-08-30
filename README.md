@@ -1,5 +1,5 @@
 # Laxuhub - 轻量级多语言开发环境管理器
-
+项目地址: https://github.com/ashi876/Laxuhub
 > 48KB 的极致简约，解决环境配置的终极痛点
 
 ## 🎯 这是什么？
