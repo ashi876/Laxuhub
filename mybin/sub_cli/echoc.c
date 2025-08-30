@@ -1,7 +1,7 @@
-// ²Î¿¼±àÒë²ÎÊıgcc -Wall -O2 -s echoc.c -o echoc.exe
-// ÎÄ¼şÃû: echoc
-// ×÷Õß£ºÇ§³ÇÕæÈË
-// ÓÃÓÚcmdÏÂÀàechoÃüÁîµÄ²ÊÉ«Êä³ö
+// å‚è€ƒç¼–è¯‘å‚æ•°gcc -Wall -O2 -s echoc.c -o echoc.exe
+// æ–‡ä»¶å: echoc
+// ä½œè€…ï¼šåƒåŸçœŸäºº
+// ç”¨äºcmdä¸‹ç±»echoå‘½ä»¤çš„å½©è‰²è¾“å‡º
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,41 +21,41 @@ void PrintColorTable() {
 }
 
 int main(int argc, char **argv) {
-    int no_newline = 0; // Ä¬ÈÏ»»ĞĞ
-    int arg_start = 1;  // ²ÎÊıÆğÊ¼Î»ÖÃ
+    int no_newline = 0; // é»˜è®¤æ¢è¡Œ
+    int arg_start = 1;  // å‚æ•°èµ·å§‹ä½ç½®
 
-    // ¼ì²é -n Ñ¡Ïî
+    // æ£€æŸ¥ -n é€‰é¡¹
     if (argc > 1 && strcmp(argv[1], "-n") == 0) {
         no_newline = 1;
         arg_start = 2;
     }
 
-    // ÎŞÓĞĞ§²ÎÊıÊ±ÏÔÊ¾°ïÖú
+    // æ— æœ‰æ•ˆå‚æ•°æ—¶æ˜¾ç¤ºå¸®åŠ©
     if (arg_start >= argc) {
         char fname[260];
         _splitpath(argv[0], NULL, NULL, fname, NULL);
-        printf("Usage: %s [-n] <ÑÕÉ«1> <ÎÄ±¾1> <ÑÕÉ«2> <ÎÄ±¾2>...\n", fname);
-        printf("  -n    : ½ûÖ¹Ä©Î²»»ĞĞ\n");
-        printf("Ê¾Àı: %s 12 Hello 15 World\n", fname);
+        printf("Usage: %s [-n] <é¢œè‰²1> <æ–‡æœ¬1> <é¢œè‰²2> <æ–‡æœ¬2>...\n", fname);
+        printf("  -n    : ç¦æ­¢æœ«å°¾æ¢è¡Œ\n");
+        printf("ç¤ºä¾‹: %s 12 Hello 15 World\n", fname);
         PrintColorTable();
         return 0;
     }
 
-    // µ¥²ÎÊı£¨ÑÕÉ«´úÂë£©
+    // å•å‚æ•°ï¼ˆé¢œè‰²ä»£ç ï¼‰
     if (arg_start + 1 >= argc) {
         SetConsoleColor(atoi(argv[arg_start]));
         return 0;
     }
 
-    // Ñ­»·´¦ÀíÑÕÉ«+ÎÄ±¾¶Ô
+    // å¾ªç¯å¤„ç†é¢œè‰²+æ–‡æœ¬å¯¹
     for (int i = arg_start; i < argc; i += 2) {
         if (i + 1 >= argc) break;
         SetConsoleColor(atoi(argv[i]));
         printf("%s", argv[i + 1]);
     }
 
-    // °´Ğè»»ĞĞ
+    // æŒ‰éœ€æ¢è¡Œ
     if (!no_newline) printf("\n");
-    SetConsoleColor(15); // »Ö¸´Ä¬ÈÏÑÕÉ«
+    SetConsoleColor(15); // æ¢å¤é»˜è®¤é¢œè‰²
     return 0;
 }
