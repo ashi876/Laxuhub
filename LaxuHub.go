@@ -46,9 +46,27 @@ var (
 )
 
 func main() {
-	// 获取基础路径
-	basePath = getBasePath()
-	myBinPath = filepath.Join(basePath, "mybin")
+    // 获取基础路径
+    basePath = getBasePath()
+    myBinPath = filepath.Join(basePath, "mybin")
+
+    // 解析命令行参数
+    quietMode := false
+    targetPath := ""
+    
+    for _, arg := range os.Args[1:] {
+        if arg == "-q" || arg == "--quiet" {
+            quietMode = true
+        } else if targetPath == "" && !strings.HasPrefix(arg, "-") {
+            // 第一个非标志参数作为目标路径
+            targetPath = arg
+        }
+    }
+
+    if quietMode {
+        startSilentMode(targetPath)
+        return
+    }
 	
 	// 加载绿色目录配置
 	loadGreenDirConfig()
@@ -490,30 +508,25 @@ func validateCommands() {
 }
 
 func startEnvironment() {
-/* 	fmt.Println("================================")
-	fmt.Println("   启动开发环境")
-	fmt.Println("================================")
+    fmt.Println()
+    
+    // 设置工作目录：优先使用通过参数传递的路径
+    workDir := ""
+    for _, arg := range os.Args[1:] {
+        if !strings.HasPrefix(arg, "-") {
+            workDir = arg
+            break
+        }
+    }
+    
+    // 如果没有参数路径，使用桌面
+    if workDir == "" {
+        workDir = filepath.Join(os.Getenv("USERPROFILE"), "Desktop")
+        if _, err := os.Stat(workDir); os.IsNotExist(err) {
+            workDir, _ = os.Getwd()
+        }
+    }
 	
-	// 显示当前设置的环境
-	fmt.Println("已设置的环境:")
-	for _, env := range selectedEnvironments {
-		parts := strings.Split(env, "_")
-		if len(parts) < 1 {
-			continue
-		}
-		langKey := parts[0]
-		
-		if langConfig, exists := greenDirConfig.Environments[langKey]; exists {
-			fmt.Printf("  %s: %s\n", langConfig.DisplayName, strings.Join(parts[1:], "_"))
-		}
-	} */
-	fmt.Println()
-	
-	// 切换到工作目录
-	workDir := filepath.Join(os.Getenv("USERPROFILE"), "Desktop")
-	if _, err := os.Stat(workDir); os.IsNotExist(err) {
-		workDir, _ = os.Getwd()
-	}
 	os.Chdir(workDir)
 	fmt.Printf("工作目录: %s\n", workDir)
 	fmt.Println()
@@ -583,4 +596,45 @@ func cleanupClinkTempFiles(tempDir string) {
 	for _, file := range files {
 		os.Remove(file)
 	}
+}
+
+// 新增：静默模式启动
+func startSilentMode(targetPath string) {
+    fmt.Println("静默模式启动...")
+    
+    // 如果有目标路径，设置工作目录
+    if targetPath != "" {
+        if _, err := os.Stat(targetPath); err == nil {
+            os.Chdir(targetPath)
+        }
+    }
+	
+	// 加载绿色目录配置
+	loadGreenDirConfig()
+	
+	// 发现可用环境
+	discoverEnvironments()
+	
+	// 加载用户配置
+	loadConfig()
+	
+	if len(configLastEnvironments) > 0 {
+		fmt.Println("读取默认配置完毕")
+		selectedEnvironments = configLastEnvironments
+	} else {
+		fmt.Println("读取配置失败，无上次配置记录")
+		// 可以选择退出或继续
+		fmt.Println("按回车键退出...")
+		bufio.NewReader(os.Stdin).ReadBytes('\n')
+		return
+	}
+	
+	// 设置环境
+	setupSelectedEnvironments(selectedEnvironments)
+	
+	// 验证环境（静默模式下可选是否显示）
+	validateCommands()
+	
+	// 启动环境
+	startEnvironment()
 }
