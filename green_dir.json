@@ -1,0 +1,57 @@
+{
+  "version": "1.0",
+  "environments": {
+    "python": {
+      "display_name": "Python",
+      "base_dir": "green_python",
+      "path_dirs": ["", "Scripts"],
+      "env_vars": {
+        "PYTHON_HOME": "{full_path}"
+      },
+      "version_pattern": "python*",
+      "validation_command": ["--version"]
+    },
+    "node": {
+      "display_name": "Node.js", 
+      "base_dir": "green_node",
+      "path_dirs": [""],
+      "env_vars": {
+        "JC_HOME": "{full_path}"
+      },
+      "version_pattern": "node*",
+      "validation_command": ["--version"]
+    },
+    "go": {
+      "display_name": "Go",
+      "base_dir": "green_go", 
+      "path_dirs": ["bin"],
+      "env_vars": {
+        "GO_ROOT": "{full_path}",
+        "GO_HOME": "{full_path}/bin"
+      },
+      "version_pattern": "go*",
+      "validation_command": ["version"]
+    },
+    "java": {
+      "display_name": "Java",
+      "base_dir": "green_java",
+      "path_dirs": ["bin"],
+      "env_vars": {
+        "JAVA_ROOT": "{full_path}",
+        "JAVA_HOME": "{full_path}/bin"
+      },
+      "version_pattern": "java*",
+      "validation_command": ["--version"]
+    },
+    "rust": {
+      "display_name": "Rust",
+      "base_dir": "green_rust",
+      "path_dirs": ["bin"],
+      "env_vars": {
+        "RUST_HOME": "{full_path}"
+      },
+      "version_pattern": "rust*",
+      "validation_command": ["--version"]
+    }
+  }
+}
