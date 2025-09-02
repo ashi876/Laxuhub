@@ -391,22 +391,6 @@ func showEnvironmentInfo() {
 	fmt.Println("   环境变量设置完成：")
 	fmt.Println("================================")
 
-	for _, env := range selectedEnvironments {
-		parts := strings.Split(env, "_")
-		if len(parts) < 1 {
-			continue
-		}
-		langKey := parts[0]
-
-		if langConfig, exists := greenDirConfig.Environments[langKey]; exists {
-			for envVar := range langConfig.EnvVars {
-				if value := os.Getenv(envVar); value != "" {
-					fmt.Printf("%s: %s\n", envVar, value)
-				}
-			}
-		}
-	}
-
 	fmt.Println()
 	fmt.Println("PATH:", os.Getenv("PATH"))
 	fmt.Println()
