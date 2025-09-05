@@ -59,7 +59,7 @@ LaxuHub 使用说明
 		green_python/ 
 			├── python3.9/ # 符合 "python*" 模式 
 			├── python-3.10/ # 符合 "python*" 模式 
-			└── python_3.11/ # 符合 "python*" 模式
+			└── python_3.11/ # 符合 "python*" 模式 注意LaxuHub.bat模式对下划线敏感（系统的锅）
 	错误示例（不会被识别）：
 		green_python/ 
 			├── 3.9/ # ❌ 缺少语言前缀 
