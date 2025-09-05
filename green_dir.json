@@ -8,8 +8,7 @@
       "env_vars": {
         "PYTHON_HOME": "{full_path}"
       },
-      "version_pattern": "python*",
-      "validation_command": ["--version"]
+      "version_pattern": "python*"
     },
     "node": {
       "display_name": "Node.js", 
@@ -18,8 +17,7 @@
       "env_vars": {
         "JC_HOME": "{full_path}"
       },
-      "version_pattern": "node*",
-      "validation_command": ["--version"]
+      "version_pattern": "node*"
     },
     "go": {
       "display_name": "Go",
@@ -29,8 +27,7 @@
         "GO_ROOT": "{full_path}",
         "GO_HOME": "{full_path}/bin"
       },
-      "version_pattern": "go*",
-      "validation_command": ["version"]
+      "version_pattern": "go*"
     },
     "java": {
       "display_name": "Java",
@@ -40,8 +37,7 @@
         "JAVA_ROOT": "{full_path}",
         "JAVA_HOME": "{full_path}/bin"
       },
-      "version_pattern": "java*",
-      "validation_command": ["--version"]
+      "version_pattern": "java*"
     },
     "rust": {
       "display_name": "Rust",
@@ -50,8 +46,7 @@
       "env_vars": {
         "RUST_HOME": "{full_path}"
       },
-      "version_pattern": "rust*",
-      "validation_command": ["--version"]
+      "version_pattern": "rust*"
     }
   }
 }

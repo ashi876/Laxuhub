@@ -1,9 +1,9 @@
 @echo off
 :: ==============================================
-:: 临时修改开发环境镜像源（仅当前CMD窗口生效）
-:: 恢复默认：关闭当前窗口或重启CMD即可
+:: 请勿再此脚本内用set path=XXX修改设置系统变量！！！
+:: 本脚本仅用于设置镜像源
 :: ==============================================
-
+echo 加载镜像源...
 :: ******************************
 :: 1. 配置 pip 镜像源
 :: ******************************
@@ -28,14 +28,12 @@ set PIP_EXTRA_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/
 set PIP_TIMEOUT=120
 
 :: 打印配置
-echo [pip 当前源配置]
-echo PIP_INDEX_URL=%PIP_INDEX_URL%
-echo PIP_TRUSTED_HOST=%PIP_TRUSTED_HOST%
-if defined PIP_EXTRA_INDEX_URL echo PIP_EXTRA_INDEX_URL=%PIP_EXTRA_INDEX_URL%
-if defined PIP_TIMEOUT echo PIP_TIMEOUT=%PIP_TIMEOUT%
+:: [pip 当前源配置]
+set PIP_INDEX_URL
+set PIP_TRUSTED_HOST
+set PIP_EXTRA_INDEX_URL
+set PIP_TIMEOUT
 
-:: 示例命令
-:: pip install numpy --verbose
 
 :: ******************************
 :: 2. 配置 UV pip 镜像源
@@ -50,12 +48,10 @@ set UV_TRUSTED_HOST=pypi.tuna.tsinghua.edu.cn
 :: set UV_TRUSTED_HOST=mirrors.aliyun.com
 
 :: 打印配置
-echo [UV 当前源配置]
-echo UV_INDEX_URL=%UV_INDEX_URL%
-if defined UV_TRUSTED_HOST echo UV_TRUSTED_HOST=%UV_TRUSTED_HOST%
-
-:: 示例命令
-:: uv pip install numpy --verbose
+REM echo [UV 当前源配置]
+REM echo UV_INDEX_URL=%UV_INDEX_URL%
+set UV_INDEX_URL
+set UV_TRUSTED_HOST
 
 :: ******************************
 :: 3. 配置 Hugging Face 镜像源
@@ -67,10 +63,40 @@ set HF_ENDPOINT=https://hf-mirror.com
 :: set HF_ENDPOINT=https://huggingface.co
 
 :: 打印配置
-echo [HF 当前源配置]
-echo HF_ENDPOINT=%HF_ENDPOINT%
+set HF_ENDPOINT
 
 :: 示例命令
 :: huggingface-cli download bigscience/bloom-560m --resume-download
 
 :: ******************************
+
+
+:: 设置所有Node.js包管理工具的国内镜像源
+::[npm yarn pnpm当前源配置]
+set TAOBAO_NPM=https://registry.npmmirror.com
+set TENCENT_NPM=https://mirrors.cloud.tencent.com/npm/
+set HUAWEI_NPM=https://mirrors.huaweicloud.com/repository/npm/
+set USTC_NPM=https://npmreg.mirrors.ustc.edu.cn/
+
+:: 设置npm镜像源（默认使用淘宝源）
+set npm_config_registry=%TAOBAO_NPM%
+set npm_config_registry
+
+:: 设置yarn镜像源
+set YARN_REGISTRY=%TAOBAO_NPM%
+set YARN_REGISTRY
+
+:: 设置pnpm镜像源
+set PNPM_REGISTRY=%TAOBAO_NPM%
+set PNPM_REGISTRY
+
+:: 设置go镜像源
+set GOPROXY=https://goproxy.cn,direct
+REM set GOPROXY=https://mirrors.aliyun.com/goproxy/,direct
+REM set GOPROXY=https://repo.huaweicloud.com/repository/goproxy/,direct
+set GOPROXY
+
+
+echo=
+
+

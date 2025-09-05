@@ -1,4 +1,4 @@
-//go build -ldflags="-s -w" -o LaxuHub.exe LaxuHub.go
+// go build -ldflags="-s -w" -o LaxuHub.exe LaxuHub.go
 package main
 
 import (
@@ -25,12 +25,11 @@ type GreenDirConfig struct {
 }
 
 type LanguageConfig struct {
-	DisplayName       string            `json:"display_name"`
-	BaseDir           string            `json:"base_dir"`
-	PathDirs          []string          `json:"path_dirs"`
-	EnvVars           map[string]string `json:"env_vars"`
-	VersionPattern    string            `json:"version_pattern"`
-	ValidationCommand []string          `json:"validation_command"`
+	DisplayName    string            `json:"display_name"`
+	BaseDir        string            `json:"base_dir"`
+	PathDirs       []string          `json:"path_dirs"`
+	EnvVars        map[string]string `json:"env_vars"`
+	VersionPattern string            `json:"version_pattern"`
 }
 
 var (
@@ -44,74 +43,78 @@ var (
 )
 
 func main() {
-    // 获取基础路径
-    basePath = getBasePath()
-    myBinPath = filepath.Join(basePath, "mybin")
+	// 获取基础路径
+	basePath = getBasePath()
+	myBinPath = filepath.Join(basePath, "mybin")
 
-    // 解析命令行参数
-    quietMode := false
-    targetPath := ""
+	// 解析命令行参数
+	quietMode := false
+	targetPath := ""
 
-    for _, arg := range os.Args[1:] {
-        if arg == "-q" || arg == "--quiet" {
-            quietMode = true
-        } else if targetPath == "" && !strings.HasPrefix(arg, "-") {
-            // 第一个非标志参数作为目标路径
-            targetPath = arg
-        }
-    }
+	for _, arg := range os.Args[1:] {
+		if arg == "-q" || arg == "--quiet" {
+			quietMode = true
+		} else if targetPath == "" && !strings.HasPrefix(arg, "-") {
+			// 第一个非标志参数作为目标路径
+			targetPath = arg
+		}
+	}
 
-    // 设置工作目录
-    if targetPath != "" {
-        if _, err := os.Stat(targetPath); err == nil {
-            os.Chdir(targetPath)
-            fmt.Printf("工作目录设置为: %s\n", targetPath)
-        } else {
-            fmt.Printf("警告: 路径 '%s' 不存在，使用当前目录\n", targetPath)
-            targetPath = ""
-        }
-    }
+	// 设置工作目录
+	if targetPath != "" {
+		if _, err := os.Stat(targetPath); err == nil {
+			os.Chdir(targetPath)
+			fmt.Printf("工作目录设置为: %s\n", targetPath)
+		} else {
+			fmt.Printf("警告: 路径 '%s' 不存在，使用当前目录\n", targetPath)
+			targetPath = ""
+		}
+	}
 
-    // 加载绿色目录配置
-    loadGreenDirConfig()
+	// 加载绿色目录配置
+	loadGreenDirConfig()
 
-    // 发现可用环境
-    discoverEnvironments()
+	// 发现可用环境
+	discoverEnvironments()
 
-    // 加载用户配置
-    loadConfig()
+	// 加载用户配置
+	loadConfig()
 
-    // 统一处理静默模式和交互模式
-    if quietMode {
-        // 静默模式：使用上次配置
-        if len(configLastEnvironments) == 0 {
-            fmt.Println("错误: 无上次配置记录，无法静默启动")
-            fmt.Println("请先以交互模式运行并选择环境配置")
-            fmt.Println("按回车键退出...")
-            bufio.NewReader(os.Stdin).ReadBytes('\n')
-            return
-        }
-        selectedEnvironments = configLastEnvironments
-        fmt.Println("静默模式启动，使用上次配置...")
-    } else {
-        // 交互模式：让用户选择
-        if len(configLastEnvironments) > 0 {
-            showQuickStartMenu()
-        } else {
-            showEnvironmentSelection()
-        }
-        
-        // 检查用户是否选择了环境
-        if len(selectedEnvironments) == 0 {
-            fmt.Println("未选择任何环境，程序退出")
-            return
-        }
-    }
+	// 统一处理静默模式和交互模式
+	if quietMode {
+		// 静默模式：使用上次配置
+		if len(configLastEnvironments) == 0 {
+			fmt.Println("提示: 无上次配置记录，进入交互模式...")
+			showEnvironmentSelection()
 
-    // 统一的后续流程
-    setupSelectedEnvironments(selectedEnvironments)
-    showEnvironmentInfo()
-    startEnvironment(targetPath)
+			// 检查用户是否在交互模式中选择了环境
+			if len(selectedEnvironments) == 0 {
+				fmt.Println("未选择任何环境，程序退出")
+				return
+			}
+		} else {
+			selectedEnvironments = configLastEnvironments
+			fmt.Println("静默模式启动，使用上次配置...")
+		}
+	} else {
+		// 交互模式：让用户选择
+		if len(configLastEnvironments) > 0 {
+			showQuickStartMenu()
+		} else {
+			showEnvironmentSelection()
+		}
+
+		// 检查用户是否选择了环境
+		if len(selectedEnvironments) == 0 {
+			fmt.Println("未选择任何环境，程序退出")
+			return
+		}
+	}
+
+	// 统一的后续流程
+	setupSelectedEnvironments(selectedEnvironments)
+	showEnvironmentInfo()
+	startEnvironment(targetPath)
 }
 func getBasePath() string {
 	if basePath != "" {
@@ -258,77 +261,95 @@ func showQuickStartMenu() {
 }
 
 func showEnvironmentSelection() {
-	fmt.Println()
-	fmt.Println("   ================================")
-	fmt.Println("       环境配置 - 多语言选择")
-	fmt.Println("   ================================")
-	fmt.Println()
-	fmt.Println("   请选择要使用的环境（可多选，输入多个编号用空格分隔）")
-	fmt.Println()
+	maxRetries := 5
 
-	index := 1
-	optionMap := make(map[int]string)
-	var languages []string
-	for lang := range availableEnvironments {
-		languages = append(languages, lang)
-	}
-	sort.Strings(languages)
+	for retry := 0; retry < maxRetries; retry++ {
+		// 清空本轮选择
+		selectedEnvironments = nil
 
-	for _, lang := range languages {
-		versions := availableEnvironments[lang]
-		langConfig := greenDirConfig.Environments[lang]
-		for _, version := range versions {
-			fmt.Printf(" [%d] %s : %s\n", index, langConfig.DisplayName, version)
-			optionMap[index] = fmt.Sprintf("%s_%s", lang, version)
-			index++
+		fmt.Println()
+		fmt.Println("   ================================")
+		fmt.Println("       环境配置 - 多语言选择")
+		fmt.Println("   ================================")
+		fmt.Println()
+		fmt.Println("   请选择要使用的环境（可多选，输入多个编号用空格分隔）")
+		fmt.Println()
+
+		index := 1
+		optionMap := make(map[int]string)
+		var languages []string
+		for lang := range availableEnvironments {
+			languages = append(languages, lang)
 		}
-	}
+		sort.Strings(languages)
 
-	fmt.Println()
-	fmt.Println(" [0] 完成选择")
-	fmt.Println()
-	fmt.Println("   示例: 1 3 5  (选择多个环境)")
-	fmt.Println()
-
-	fmt.Print("请输入要选择的环境编号: ")
-	reader := bufio.NewReader(os.Stdin)
-	input, _ := reader.ReadString('\n')
-	input = strings.TrimSpace(input)
-
-	if input == "0" {
-		saveConfig()
-		return
-	}
-
-	selections := strings.Fields(input)
-	selectedLanguages := make(map[string]bool)
-
-	for _, selStr := range selections {
-		sel, err := strconv.Atoi(selStr)
-		if err != nil || sel < 1 || sel >= index {
-			fmt.Printf("无效的选择: %s\n", selStr)
-			continue
+		for _, lang := range languages {
+			versions := availableEnvironments[lang]
+			langConfig := greenDirConfig.Environments[lang]
+			for _, version := range versions {
+				fmt.Printf(" [%d] %s : %s\n", index, langConfig.DisplayName, version)
+				optionMap[index] = fmt.Sprintf("%s_%s", lang, version)
+				index++
+			}
 		}
 
-		envKey := optionMap[sel]
-		lang := strings.Split(envKey, "_")[0]
+		fmt.Println()
+		fmt.Println(" [0] 完成选择")
+		fmt.Println(" [q] 退出选择")
+		fmt.Println()
+		fmt.Printf("   示例: 1 3 5  (选择多个环境, 剩余尝试次数: %d/%d)\n", maxRetries-retry, maxRetries)
+		fmt.Println()
 
-		if selectedLanguages[lang] {
-			fmt.Printf("语言 %s 已选择，跳过重复选择\n", lang)
-			continue
+		fmt.Print("请输入要选择的环境编号: ")
+		reader := bufio.NewReader(os.Stdin)
+		input, _ := reader.ReadString('\n')
+		input = strings.TrimSpace(input)
+
+		// 退出选项
+		if input == "0" {
+			return
+		}
+		if strings.ToLower(input) == "q" {
+			selectedEnvironments = nil
+			return
 		}
 
-		selectedLanguages[lang] = true
-		selectedEnvironments = append(selectedEnvironments, envKey)
-	}
+		// 处理选择
+		selections := strings.Fields(input)
+		selectedLanguages := make(map[string]bool)
 
-	if len(selectedEnvironments) == 0 {
-		fmt.Println("错误：未选择任何环境！")
-		showEnvironmentSelection()
-		return
-	}
+		for _, selStr := range selections {
+			sel, err := strconv.Atoi(selStr)
+			if err != nil || sel < 1 || sel >= index {
+				fmt.Printf("无效的选择: %s\n", selStr)
+				continue
+			}
 
-	saveConfig()
+			envKey := optionMap[sel]
+			lang := strings.Split(envKey, "_")[0]
+
+			if selectedLanguages[lang] {
+				fmt.Printf("语言 %s 已选择，跳过重复选择\n", lang)
+				continue
+			}
+
+			selectedLanguages[lang] = true
+			selectedEnvironments = append(selectedEnvironments, envKey)
+		}
+
+		if len(selectedEnvironments) > 0 {
+			saveConfig()
+			return // 选择成功，退出循环
+		}
+
+		// 选择失败处理
+		if retry < maxRetries-1 {
+			fmt.Printf("错误：未选择任何环境，还有 %d 次尝试机会\n", maxRetries-retry-1)
+		} else {
+			fmt.Println("错误次数过多，退出环境选择")
+			selectedEnvironments = nil
+		}
+	}
 }
 
 func setupSelectedEnvironments(envs []string) {
@@ -395,23 +416,83 @@ func showEnvironmentInfo() {
 	fmt.Println("PATH:", os.Getenv("PATH"))
 	fmt.Println()
 
+	// cn_mirror.bat 在 mybin 目录下
 	mirrorBat := filepath.Join(myBinPath, "cn_mirror.bat")
 	if _, err := os.Stat(mirrorBat); err == nil {
 		fmt.Println("设置镜像源...")
 
-		cmd := exec.Command(mirrorBat)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-
-		err := cmd.Run()
+		// 使用特殊方法执行bat并获取环境变量
+		err := applyBatchFileEnvVars(mirrorBat)
 		if err != nil {
 			fmt.Printf("镜像源设置执行失败: %v\n", err)
+		} else {
+			fmt.Println("镜像源设置完成")
 		}
 	} else {
 		fmt.Println("cn_mirror.bat 文件不存在，使用默认源")
 	}
 
 	fmt.Println("================================")
+}
+
+func applyBatchFileEnvVars(batchFile string) error {
+	originalEnv := getCurrentEnvMap()
+
+	cmd := exec.Command("cmd", "/C", batchFile, "&&", "set")
+	output, err := cmd.Output()
+	if err != nil {
+		return err
+	}
+
+	newEnv := parseEnvOutput(string(output))
+
+	// 新增：按字母顺序排序
+	var keys []string
+	for key := range newEnv {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys) // 按字母排序
+
+	// 按排序后的顺序遍历
+	for _, key := range keys {
+		newValue := newEnv[key]
+		if oldValue, exists := originalEnv[key]; !exists || oldValue != newValue {
+			os.Setenv(key, newValue)
+			fmt.Printf("   设置: %s=%s\n", key, newValue)
+		}
+	}
+
+	return nil
+}
+
+// 辅助函数：获取当前环境变量的map
+func getCurrentEnvMap() map[string]string {
+	envMap := make(map[string]string)
+	for _, env := range os.Environ() {
+		if parts := strings.SplitN(env, "=", 2); len(parts) == 2 {
+			envMap[parts[0]] = parts[1]
+		}
+	}
+	return envMap
+}
+
+// 辅助函数：解析 set 命令的输出
+func parseEnvOutput(output string) map[string]string {
+	envMap := make(map[string]string)
+	lines := strings.Split(output, "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		if strings.Contains(line, "=") && !strings.HasPrefix(line, "=") {
+			parts := strings.SplitN(line, "=", 2)
+			if len(parts) == 2 {
+				envMap[parts[0]] = parts[1]
+			}
+		}
+	}
+	return envMap
 }
 
 func startEnvironment(targetPath string) {
@@ -449,8 +530,6 @@ func startEnvironment(targetPath string) {
 		}
 	} else {
 		fmt.Println("警告: 未找到 Clink，启动普通命令行")
-		fmt.Println("提示: 在新窗口中可以使用设置好的所有开发环境")
-		fmt.Println("      输入 exit 可以退出该环境")
 		fmt.Println()
 
 		cmd := exec.Command("cmd.exe", "/k")

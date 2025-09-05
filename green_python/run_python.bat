@@ -84,10 +84,10 @@ for /d %%i in ("%mybin%\sub_*") do (
 set "PATH=%PYTHON_HOME%;%PYTHON_HOME%\Scripts;%mybin%;%mybin_sub%;%PATH%"
 
 :: 调用镜像源设置脚本（如果存在）
-if exist "%mybin%\cn_mirror.bat" (
-    call "%mybin%\cn_mirror.bat"
+if exist "%mybin%\pip_mirror.bat" (
+    call "%mybin%\pip_mirror.bat"
 ) else (
-    echo "cn_mirror.bat"文件不存在，使用默认源
+    echo "pip_mirror.bat"文件不存在，使用默认源
 )
 
 

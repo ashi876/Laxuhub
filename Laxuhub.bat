@@ -183,6 +183,11 @@ for %%e in (!LAST_ENVIRONMENTS!) do (
                 set "GO_ROOT=%%g\!version!"
                 set "GO_HOME=!GO_ROOT!\bin"
                 set "PATH=!GO_HOME!;!PATH!"
+            ) else if "!lang!"=="java" (
+                set "JAVA_ROOT=%%g\!version!"
+                set "JAVA_HOME=!JAVA_ROOT!\bin"
+                set "PATH=!JAVA_HOME!;!PATH!"
+                echo JAVA_HOME=!JAVA_HOME!
             )
         )
     )
@@ -196,6 +201,7 @@ echo ================================
 if defined PYTHON_HOME echo Python: !PYTHON_HOME!
 if defined JC_HOME echo Node.js: !JC_HOME!
 if defined GO_HOME echo Go: !GO_HOME!
+if defined JAVA_HOME echo java: !JAVA_HOME!
 echo.
 echo PATH: !PATH!
 echo.
@@ -214,6 +220,7 @@ echo ================================
 python --version >nul 2>&1 && echoc 10 Python命令可用 || echo ? Python命令不可用
 node --version >nul 2>&1 && echoc 10 Node.js命令可用 || echo ? Node.js命令不可用  
 go version >nul 2>&1 && echoc 10 Go命令可用 || echo ? Go命令不可用
+java --version >nul 2>&1 && echoc 10 java命令可用 || echo ? java命令不可用
 echo.
 
 :: 启动Clink
