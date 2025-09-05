@@ -3,6 +3,7 @@ LaxuHub 使用说明
 功能：快速切换和管理多版本开发环境（Python/Node.js/Go/Java/Rust等） 
 
 基本用法 
+
 	交互模式（首次推荐） 
 		LaxuHub.exe 
 	静默模式（使用上次配置） 
@@ -11,12 +12,14 @@ LaxuHub 使用说明
 		LaxuHub.exe "D:\MyProject" 
 
 操作流程 
+
 	首次运行： 
 	进入交互选择界面
 	输入环境编号（可多选，空格分隔）
 	示例：1 3 5（选择第1、3、5个环境）后回车
 
 后续使用： 
+
 	默认显示上次配置选项
 	回车确认使用上次配置
 	输入 N 重新选择环境
@@ -44,11 +47,14 @@ LaxuHub 使用说明
 
 环境目录命名规则 
 
-语言目录： 
-	格式：green_{语言名}（如 green_python, green_node）
+语言目录格式：
+
+	green_{语言名}（如 green_python, green_node）
 		示例：green_python/, green_node/
+		
 	版本目录： 
 		必须包含语言名前缀（符合配置中的 version_pattern）
+		
 	示例格式：
 		green_python/ 
 			├── python3.9/ # 符合 "python*" 模式 
@@ -83,18 +89,21 @@ LaxuHub 使用说明
 	位置：mybin/cn_mirror.bat
 
 环境配置 
+
 	配置文件：green_dir.json（程序自带，按需添加环境）
 	添加新环境：参考已有格式添加新语言配置
 
 配置包含：
 
 显示名称
+
 	基础目录（如 green_python）
 	PATH子目录（如 ["", "Scripts"]）
 	环境变量（如 PYTHON_HOME）
 	版本匹配模式（如 python*）
 	
 特性 
+
 	✅ 多环境任意组合同时激活（PATH/环境变量自动合并）
 	✅ 防重复选择（同一语言只选一个版本）
 	✅ 镜像源自动配置（通过cn_mirror.bat）
@@ -105,10 +114,10 @@ LaxuHub 使用说明
 
 注意事项 
 
-环境目录必须以 green_ 前缀命名
-版本目录必须包含语言名前缀（如 python3.9 而非 3.9）
-版本目录命名需符合配置中的 version_pattern（如 python*）
-修改 green_dir.json 后需重启程序生效
+	环境目录必须以 green_ 前缀命名
+	版本目录必须包含语言名前缀（如 python3.9 而非 3.9）
+	版本目录命名需符合配置中的 version_pattern（如 python*）
+	修改 green_dir.json 后需重启程序生效
 
 退出环境：关闭启动的命令行窗口即可
 
