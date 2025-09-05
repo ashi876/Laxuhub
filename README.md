@@ -1,51 +1,115 @@
-# Laxuhub - 轻量级多语言开发环境管理器
-项目地址: https://github.com/ashi876/Laxuhub
-> 7KB 的批处理版极致简约，解决环境配置的终极痛点，多语言环境任意组合非容器无损耗
-> 14KB 的go语言版重刻版性能更好，功能更强，配置更灵活
+LaxuHub 使用说明 
 
-## 🎯 这是什么？
+功能：快速切换和管理多版本开发环境（Python/Node.js/Go/Java/Rust等） 
 
-win平台，一个用纯批处理编写的绿色版多语言开发环境管理器。无需安装、无需配置、解压即用、扩展简单。
+基本用法 
+	交互模式（首次推荐） 
+		LaxuHub.exe 
+	静默模式（使用上次配置） 
+		LaxuHub.exe -q 
+	指定工作目录启动 
+		LaxuHub.exe "D:\MyProject" 
 
-20250901更新go版启动器
+操作流程 
+	首次运行： 
+	进入交互选择界面
+	输入环境编号（可多选，空格分隔）
+	示例：1 3 5（选择第1、3、5个环境）后回车
 
+后续使用： 
+	默认显示上次配置选项
+	回车确认使用上次配置
+	输入 N 重新选择环境
+	用LaxuHub.exe -q 静默模式直接进入上次配置
 
-## 🌟 核心特性
+目录结构 
 
-- 🚀 秒级启动：3秒内进入编码状态，捕捉灵感不延迟
-- 🍃 极致轻量：全部代码仅21KB，零依赖
-- 🔧 多语言支持：Python, Node.js, Go, Java, GCC, Lua...任意扩展
-- 📦 绿色环保：无需安装，不污染系统，删除即卸载
-- 🎮 简单直观：目录即配置，命名即约定，一看就懂
+	LaxuHub/ 
+	├── LaxuHub.exe # 主程序 
+	├── green_dir.json # 环境配置（必需） 
+	├── mybin/ # 工具目录 
+	│ ├── cn_mirror.bat # 镜像源设置脚本 
+	│ └── sub_*/ # 工具子目录（如sub_clink） 
+	└── green_*/ # 环境目录（按语言命名） 
+	├── green_python/ # Python环境 
+	│ ├── python3.9/ # Python 3.9版本 
+	│ ├── python3.10/ # Python 3.10版本 
+	│ └── python3.11/ # Python 3.11版本 
+	├── green_node/ # Node.js环境 
+	│ ├── node16/ # Node.js 16版本 
+	│ └── node18/ # Node.js 18版本 
+	├── green_go/ # Go环境 
+	├── green_java/ # Java环境 
+	└── green_rust/ # Rust环境 
 
-## 📁 项目结构
+环境目录命名规则 
 
-    laxuhub/
-    ├── green_语言名/          # 环境容器目录
-    │   ├── 版本1/           # 具体版本（如python39）
-    │   └── 版本2/           # 多个版本共存
-    ├── mybin/               # 核心脚本目录
-    │   └── sub_工具名/      # 插件工具目录（自动识别）
-    ├── data/               # 数据存储
-    └── Laxuhub.bat         # 主入口脚本
-	└── Laxuhub.exe         # 主入口程序
-	└── green_dir.json      # 环境扩展数据
+语言目录： 
+	格式：green_{语言名}（如 green_python, green_node）
+		示例：green_python/, green_node/
+	版本目录： 
+		必须包含语言名前缀（符合配置中的 version_pattern）
+	示例格式：
+		green_python/ 
+			├── python3.9/ # 符合 "python*" 模式 
+			├── python-3.10/ # 符合 "python*" 模式 
+			└── python_3.11/ # 符合 "python*" 模式
+	错误示例（不会被识别）：
+		green_python/ 
+			├── 3.9/ # ❌ 缺少语言前缀 
+			├── v3.10/ # ❌ 不符合 "python*" 模式 
+			└── py3.11/ # ❌ 不匹配配置中的模式
 
-## 🚀 快速开始
+核心组件说明 
 
-### 1. 下载解压
-直接下载压缩包，解压到任意位置（建议D:\laxuhub）
+	mybin 目录： 
+		存放全局工具和脚本
+		自动添加到PATH最前，确保工具优先级
+		支持子目录扩展（通过 sub_* 命名）
+	
+	sub_ 子目录*： 
+		存放特定工具集（如 sub_clink 存放Clink增强工具）
+		自动扫描并添加到PATH
+		示例： 
+		mybin/ 
+		├── sub_clink/ # Clink命令行增强 
+		├── sub_git/ # Git工具集 
+		└── sub_utils/ # 通用工具
+	
+	cn_mirror.bat： 
+	自动配置国内镜像源
+	支持常见包管理器（pip/npm/go等）
+	启动时自动执行，显著提升包下载速度
+	位置：mybin/cn_mirror.bat
 
-### 2. 任意添加环境(可选)
-将绿色版语言环境放入对应目录：
+环境配置 
+	配置文件：green_dir.json（程序自带，按需添加环境）
+	添加新环境：参考已有格式添加新语言配置
 
-示例：添加Python3.9
-将python39文件夹复制到 green_python/ 目录下
+配置包含：
 
-### 3. 运行
-双击 Laxuhub.bat，选择需要的环境版本
+显示名称
+	基础目录（如 green_python）
+	PATH子目录（如 ["", "Scripts"]）
+	环境变量（如 PYTHON_HOME）
+	版本匹配模式（如 python*）
+	
+特性 
+	✅ 多环境任意组合同时激活（PATH/环境变量自动合并）
+	✅ 防重复选择（同一语言只选一个版本）
+	✅ 镜像源自动配置（通过cn_mirror.bat）
+	✅ 语言环境目录自由扩展（通过green_dir.json）
+	✅ 工具目录自由扩展（sub_*子目录）
+	✅ Clink命令行增强（自动检测启用）
+	✅ 工作目录支持（启动时自动切换）
 
-支持同时激活多个语言环境，适合全栈开发
+注意事项 
 
-## 作者
-千城真人 b站_碎辰a
+环境目录必须以 green_ 前缀命名
+版本目录必须包含语言名前缀（如 python3.9 而非 3.9）
+版本目录命名需符合配置中的 version_pattern（如 python*）
+修改 green_dir.json 后需重启程序生效
+
+退出环境：关闭启动的命令行窗口即可
+
+作者: 千城真人 b站_碎辰a
