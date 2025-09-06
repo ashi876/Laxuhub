@@ -8,16 +8,16 @@
       "env_vars": {
         "PYTHON_HOME": "{full_path}"
       },
-      "version_pattern": "python*"
+      "searchprefix_string": ["python", "cpython"]
     },
     "node": {
       "display_name": "Node.js", 
       "base_dir": "green_node",
       "path_dirs": [""],
       "env_vars": {
-        "JC_HOME": "{full_path}"
+        "NODE_HOME": "{full_path}"
       },
-      "version_pattern": "node*"
+      "searchprefix_string": ["node", "nodejs"]
     },
     "go": {
       "display_name": "Go",
@@ -27,7 +27,7 @@
         "GO_ROOT": "{full_path}",
         "GO_HOME": "{full_path}/bin"
       },
-      "version_pattern": "go*"
+      "searchprefix_string": ["go", "golang"]
     },
     "java": {
       "display_name": "Java",
@@ -37,7 +37,7 @@
         "JAVA_ROOT": "{full_path}",
         "JAVA_HOME": "{full_path}/bin"
       },
-      "version_pattern": "java*"
+      "searchprefix_string": ["java", "jdk", "openjdk", "jre"]
     },
     "rust": {
       "display_name": "Rust",
@@ -46,7 +46,7 @@
       "env_vars": {
         "RUST_HOME": "{full_path}"
       },
-      "version_pattern": "rust*"
+      "searchprefix_string": ["rust"]
     }
   }
 }

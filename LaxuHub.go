@@ -3,6 +3,7 @@ package main
 
 import (
 	"bufio"
+	"net/url" 
 	"encoding/json"
 	"fmt"
 	"os"
@@ -25,11 +26,11 @@ type GreenDirConfig struct {
 }
 
 type LanguageConfig struct {
-	DisplayName    string            `json:"display_name"`
-	BaseDir        string            `json:"base_dir"`
-	PathDirs       []string          `json:"path_dirs"`
-	EnvVars        map[string]string `json:"env_vars"`
-	VersionPattern string            `json:"version_pattern"`
+    DisplayName       string            `json:"display_name"`
+    BaseDir           string            `json:"base_dir"`
+    PathDirs          []string          `json:"path_dirs"`
+    EnvVars           map[string]string `json:"env_vars"`
+    SearchPrefixString []string         `json:"searchprefix_string"` // 新的字段
 }
 
 var (
@@ -167,15 +168,26 @@ func discoverEnvironments() {
 		}
 
 		var versions []string
-		lowerLang := strings.ToLower(langKey)
 
 		for _, file := range files {
 			if file.IsDir() {
 				dirName := file.Name()
 				lowerDirName := strings.ToLower(dirName)
 
-				if strings.HasPrefix(lowerDirName, lowerLang) {
-					versions = append(versions, dirName)
+				// 获取配置的前缀数组
+				prefixesToUse := langConfig.SearchPrefixString
+				// 如果配置为空数组，使用语言键作为默认前缀
+				if len(prefixesToUse) == 0 {
+					prefixesToUse = []string{strings.ToLower(langKey)}
+				}
+
+				// 遍历所有配置的前缀进行匹配
+				for _, prefix := range prefixesToUse {
+					lowerPrefix := strings.ToLower(prefix)
+					if strings.HasPrefix(lowerDirName, lowerPrefix) {
+						versions = append(versions, dirName)
+						break // 匹配到一个前缀就退出内层循环
+					}
 				}
 			}
 		}
@@ -186,6 +198,7 @@ func discoverEnvironments() {
 		}
 	}
 
+	// 发现 mybin 子目录
 	subPattern := filepath.Join(myBinPath, "sub_*")
 	subMatches, err := filepath.Glob(subPattern)
 	if err == nil {
@@ -215,7 +228,16 @@ func loadConfig() {
 		line := strings.TrimSpace(scanner.Text())
 		if strings.HasPrefix(line, "LastEnvironments=") {
 			envs := strings.TrimPrefix(line, "LastEnvironments=")
-			configLastEnvironments = strings.Fields(envs)
+			encodedEnvs := strings.Fields(envs)
+			
+			// 解码URL编码的字符串
+			for _, encodedEnv := range encodedEnvs {
+				if decoded, err := url.QueryUnescape(encodedEnv); err == nil {
+					configLastEnvironments = append(configLastEnvironments, decoded)
+				} else {
+					fmt.Printf("解码配置项失败: %v\n", err)
+				}
+			}
 			break
 		}
 	}
@@ -230,8 +252,15 @@ func saveConfig() {
 	}
 	defer file.Close()
 
+	// 对目录名进行URL编码，处理空格和特殊字符
+	var encodedEnvs []string
+	for _, env := range selectedEnvironments {
+		encoded := url.QueryEscape(env) // 使用URL编码
+		encodedEnvs = append(encodedEnvs, encoded)
+	}
+
 	content := fmt.Sprintf("[Settings]\nLastEnvironments=%s\nConfigVersion=%s\n",
-		strings.Join(selectedEnvironments, " "), ConfigVersion)
+		strings.Join(encodedEnvs, " "), ConfigVersion)
 	file.WriteString(content)
 }
 
