@@ -39,14 +39,14 @@
       },
       "searchprefix_string": ["java", "jdk", "openjdk", "jre"]
     },
-    "rust": {
-      "display_name": "Rust",
-      "base_dir": "green_rust",
-      "path_dirs": ["bin"],
+    "custom": {
+      "display_name": "custom",
+      "base_dir": "green_custom",
+      "path_dirs": ["","bin"],
       "env_vars": {
-        "RUST_HOME": "{full_path}"
+        "CUSTOM_HOME": "{full_path}"
       },
-      "searchprefix_string": ["rust"]
+      "searchprefix_string": ["custom"]
     }
   }
 }
