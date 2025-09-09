@@ -65,7 +65,7 @@ func main() {
 	if targetPath != "" {
 		if _, err := os.Stat(targetPath); err == nil {
 			os.Chdir(targetPath)
-			fmt.Printf("工作目录设置为: %s\n", targetPath)
+			//fmt.Printf("工作目录设置为: %s\n", targetPath)
 		} else {
 			fmt.Printf("警告: 路径 '%s' 不存在，使用当前目录\n", targetPath)
 			targetPath = ""
