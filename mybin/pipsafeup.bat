@@ -18,21 +18,35 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-:: 1. 检测curl是否可用
-echo [1/4] 检测下载工具...
+:: 1. 检测wget是否可用（新增）
+echo [1/5] 检测下载工具...
+where wget >nul 2>nul
+if %errorlevel% equ 0 (
+    echo  使用wget下载安装器...
+    wget --show-progress -O "%OUTPUT_FILE%" "%PIP_URL%"
+    if %errorlevel% equ 0 (
+        if exist "%OUTPUT_FILE%" (
+            echo  √ 下载成功（wget）
+            goto install
+        )
+    )
+)
+
+:: 2. 检测curl是否可用
+echo [2/5] wget不可用，尝试curl...
 where curl >nul 2>nul
 if %errorlevel% equ 0 (
     echo  使用curl下载安装器...
-    curl -L -k -o "%OUTPUT_FILE%" "%PIP_URL%"
+    curl -L -k -o "%OUTPUT_FILE%" "%PIP_URL%" >nul 2>&1
     if exist "%OUTPUT_FILE%" (
         echo  √ 下载成功（curl）
         goto install
     )
 )
 
-:: 2. 切换到certutil下载
-echo [2/4] curl不可用，改用powershell...
-powershell -Command "Invoke-WebRequest -Uri '%PIP_URL%' -OutFile '%OUTPUT_FILE%' -UseBasicParsing" >nul
+:: 3. 切换到certutil下载
+echo [3/5] curl不可用，改用powershell...
+powershell -Command "Invoke-WebRequest -Uri '%PIP_URL%' -OutFile '%OUTPUT_FILE%' -UseBasicParsing" >nul 2>&1
 if %errorlevel% equ 0 (
     if exist "%OUTPUT_FILE%" (
         echo  √ 下载成功（PowerShell）
@@ -40,17 +54,17 @@ if %errorlevel% equ 0 (
     )
 )
 
-:: 3. 下载失败处理
-echo [3/4] 错误：下载失败！
+:: 4. 下载失败处理
+echo [4/5] 错误：下载失败！
 echo 可能原因：
 echo   a) 网络不通 - 尝试ping bootstrap.pypa.io
 echo   b) 代理问题 - 检查网络代理设置
 echo   c) 安全软件拦截 - 暂时禁用防火墙
 exit /b 1
 
-:: 4. 执行纯净安装
+:: 5. 执行纯净安装
 :install
-echo [4/4] 执行纯净网络安装...
+echo [5/5] 执行纯净网络安装...
 %PYTHON_EXE% "%OUTPUT_FILE%" --no-warn-script-location --no-cache-dir
 
 :: 验证安装
