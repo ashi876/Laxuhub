@@ -63,17 +63,21 @@ LaxuHub 使用说明
 	错误示例（不会被识别）：
 		green_python/ 
 			├── 3.9/ # ❌ 缺少语言前缀 
-			├── v3.10/ # ❌ 不符合 "python*" 模式 
-			└── py3.11/ # ❌ 不匹配配置中的模式
+			└── v3.10/ # ❌ 不符合 "python*" 模式 
 
-核心组件说明 
+用户可定义用于扩展新语言留下的三重接口:
 
-	mybin 目录： 
+	green_dir.json + green_XX 目录：
+		
+		作用：定义如何集成一个复杂的、需要特殊环境变量和路径设置的正式语言环境（如 Python, Java, Go）。
+		扩展方式：任何新语言，只要遵循在 json 中定义配置、在对应 green_xxx 目录下放置发行版的规则，就能被自动识别和集成。
+		
+	mybin目录及sub_ 子目录*：： 
+	
 		存放全局工具和脚本
 		自动添加到PATH最前，确保工具优先级
 		支持子目录扩展（通过 sub_* 命名）
-	
-	sub_ 子目录*： 
+		sub_ 子目录*： 
 		存放特定工具集（如 sub_clink 存放Clink增强工具）
 		自动扫描并添加到PATH
 		示例： 
@@ -82,25 +86,28 @@ LaxuHub 使用说明
 		├── sub_git/ # Git工具集 
 		└── sub_utils/ # 通用工具
 	
-	cn_mirror.bat： 
-	自动配置国内镜像源
-	支持常见包管理器（pip/npm/go等）
-	启动时自动执行，显著提升包下载速度
-	位置：mybin/cn_mirror.bat
+	sub_clink目录下的clink_start.cmd，运行时环境个性化协议
 
-环境配置 
+		作用：在核心环境变量设置完成后，提供一个最后的钩子 (Hook)，允许用户执行任意bat命令（call 其他脚本）或设置临时、会话特有的环境变量（set）。
+		扩展方式：用户可以用它来做任何事情：启动后台服务、设置项目特有的变量、连接网络驱动器、定义别名（alias）等。
+	
+	其它设置:
+	cn_mirror.bat： 
+	
+		自动配置国内镜像源
+		支持常见包管理器（pip/npm/go等）
+		启动时自动执行，显著提升包下载速度
+		位置：mybin/cn_mirror.bat
+
+主环境配置 
 
 	配置文件：green_dir.json（程序自带，按需添加环境）
 	添加新环境：参考已有格式添加新语言配置
-
-配置包含：
-
-显示名称
-
-	基础目录（如 green_python）
-	PATH子目录（如 ["", "Scripts"]）
-	环境变量（如 PYTHON_HOME）
-	版本匹配模式（如 python*）
+	配置包含：
+		基础目录（如 green_python）
+		PATH子目录（如 ["", "Scripts"]）
+		环境变量（如 PYTHON_HOME）
+		版本匹配模式（如 "python"）匹配green_python目录内"python"开头的子目录
 	
 特性 
 
@@ -114,10 +121,9 @@ LaxuHub 使用说明
 
 注意事项 
 
-	环境目录必须以 green_ 前缀命名
-	版本目录必须包含语言名前缀（如 python3.9 而非 3.9）
-	版本目录命名需符合配置中的 version_pattern（如 python*）
-	修改 green_dir.json 后需重启程序生效
+-   **配置更新**：修改 `green_dir.json` 后需重启 LaxuHub 程序生效。
+-   **Python pip 路径问题**：Python 的 `pip` 工具官方写死绝对路径。如果 LaxuHub 的安装目录**不是** `D:\` 根目录，在首次使用 Python 环境后，需要重置 `pip` 以避免后续使用中出现路径错误。
+    -   **解决方案**：程序包提供了 `pipreset.bat` (重置) 和 `pipsafeup.bat` (更新并重置) 两个辅助脚本。可直接按需选一个键入命令运行。
 
 退出环境：关闭启动的命令行窗口即可
 
