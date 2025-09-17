@@ -47,6 +47,16 @@
         "CUSTOM_HOME": "{full_path}"
       },
       "searchprefix_string": ["custom"]
+    },
+    "rust": {
+      "display_name": "Rust",
+      "base_dir": "green_rust",
+      "path_dirs": ["cargo/bin", "rustc/bin"],
+      "env_vars": {
+        "RUSTFLAGS": "--sysroot={full_path}/rust-std-x86_64-pc-windows-msvc",
+        "CARGO_HOME": "{full_path}/cargo"
+      },
+      "searchprefix_string": ["rust"]
     }
   }
 }
