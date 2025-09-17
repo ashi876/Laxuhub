@@ -65,7 +65,6 @@ func main() {
 	if targetPath != "" {
 		if _, err := os.Stat(targetPath); err == nil {
 			os.Chdir(targetPath)
-			//fmt.Printf("工作目录设置为: %s\n", targetPath)
 		} else {
 			fmt.Printf("警告: 路径 '%s' 不存在，使用当前目录\n", targetPath)
 			targetPath = ""
@@ -543,7 +542,6 @@ func startEnvironment(targetPath string) {
 	clinkPath := filepath.Join(myBinPath, "sub_clink", "clink.bat")
 	if _, err := os.Stat(clinkPath); err == nil {
 		fmt.Println("正在启动 Clink 增强命令行...")
-		fmt.Println()
 
 		cmd := exec.Command("cmd.exe", "/k", clinkPath, "inject", "--quiet")
 		cmd.Env = os.Environ()
