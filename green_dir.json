@@ -6,7 +6,8 @@
       "base_dir": "green_python",
       "path_dirs": ["", "Scripts"],
       "env_vars": {
-        "PYTHON_HOME": "{full_path}"
+        "PYTHON_HOME": "{full_path}",
+        "UV_CACHE_DIR": "{full_path}/../../data/cache/uv"
       },
       "searchprefix_string": ["python", "cpython"]
     },
@@ -54,7 +55,7 @@
       "path_dirs": ["cargo/bin", "rustc/bin"],
       "env_vars": {
         "RUSTFLAGS": "--sysroot={full_path}/rust-std-x86_64-pc-windows-msvc",
-        "CARGO_HOME": "{full_path}/cargo"
+        "CARGO_HOME": "{full_path}/../../data/cargo"
       },
       "searchprefix_string": ["rust"]
     }
