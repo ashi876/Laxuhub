@@ -101,26 +101,24 @@ echo 设置 Rust 国内镜像源...
 
 :: 设置 rustup cargo 镜像源环境变量
 :: 中科大
-REM set RUSTUP_DIST_SERVER=https://mirrors.ustc.edu.cn/rust-static
-REM set RUSTUP_UPDATE_ROOT=https://mirrors.ustc.edu.cn/rust-static/rustup
-REM set CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
-REM set CARGO_REGISTRIES_CRATES_IO_INDEX=https://mirrors.ustc.edu.cn/crates.io-index
+set CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
+set RUSTUP_DIST_SERVER=https://mirrors.ustc.edu.cn/rust-static
+set RUSTUP_UPDATE_ROOT=https://mirrors.ustc.edu.cn/rust-static/rustup
+set CARGO_REGISTRIES_CRATES_IO_INDEX=https://mirrors.ustc.edu.cn/crates.io-index
+
+
 :: 清华
 REM set RUSTUP_DIST_SERVER=https://rsproxy.cn
 REM set RUSTUP_UPDATE_ROOT=https://rsproxy.cn/rustup
-REM set CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
-REM set CARGO_REGISTRIES_CRATES_IO_INDEX=https://rsproxy.cn/crates.io-index
 
 :: 设置阿里云镜像
-set RUSTUP_DIST_SERVER=https://mirrors.aliyun.com/rustup
-set RUSTUP_UPDATE_ROOT=https://mirrors.aliyun.com/rustup/rustup
-set CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
-set CARGO_REGISTRIES_CRATES_IO_INDEX=https://mirrors.aliyun.com/crates.io-index
+REM set RUSTUP_DIST_SERVER=https://mirrors.aliyun.com/rustup
+REM set RUSTUP_UPDATE_ROOT=https://mirrors.aliyun.com/rustup/rustup
 
+set CARGO_REGISTRIES_CRATES_IO_PROTOCOL
 set RUSTUP_DIST_SERVER
 set RUSTUP_UPDATE_ROOT
-set CARGO_REGISTRIES_CRATES_IO_PROTOCOL
-set CARGO_REGISTRIES_CRATES_IO_INDEX
+
 
 
 
