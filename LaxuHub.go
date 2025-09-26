@@ -4,7 +4,6 @@ package main
 import (
 	"bufio"
 	"net/url" 
-	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -12,25 +11,27 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	
+	"github.com/pelletier/go-toml/v2" // 新增 TOML 库
 )
 
 const (
 	ConfigFileName     = "laxuhub_config.ini"
-	GreenDirConfigFile = "green_dir.json"
+	GreenDirConfigFile = "laxuhub.toml" // 修改为 TOML 文件
 	ConfigVersion      = "1.0"
 )
 
 type GreenDirConfig struct {
-	Version      string                    `json:"version"`
-	Environments map[string]LanguageConfig `json:"environments"`
+	Version      string                    `toml:"version"` // 修改标签
+	Environments map[string]LanguageConfig `toml:"environments"`
 }
 
 type LanguageConfig struct {
-    DisplayName       string            `json:"display_name"`
-    BaseDir           string            `json:"base_dir"`
-    PathDirs          []string          `json:"path_dirs"`
-    EnvVars           map[string]string `json:"env_vars"`
-    SearchPrefixString []string         `json:"searchprefix_string"` // 新的字段
+    DisplayName       string            `toml:"display_name"`
+    BaseDir           string            `toml:"base_dir"`
+    PathDirs          []string          `toml:"path_dirs"`
+    EnvVars           map[string]string `toml:"env_vars"`
+    SearchPrefixString []string         `toml:"searchprefix_string"`
 }
 
 var (
@@ -65,6 +66,7 @@ func main() {
 	if targetPath != "" {
 		if _, err := os.Stat(targetPath); err == nil {
 			os.Chdir(targetPath)
+			//fmt.Printf("工作目录设置为: %s\n", targetPath)
 		} else {
 			fmt.Printf("警告: 路径 '%s' 不存在，使用当前目录\n", targetPath)
 			targetPath = ""
@@ -116,6 +118,7 @@ func main() {
 	showEnvironmentInfo()
 	startEnvironment(targetPath)
 }
+
 func getBasePath() string {
 	if basePath != "" {
 		return basePath
@@ -137,15 +140,15 @@ func loadGreenDirConfig() {
 		os.Exit(1)
 	}
 
-	file, err := os.Open(configPath)
+	// 读取 TOML 文件内容
+	fileContent, err := os.ReadFile(configPath)
 	if err != nil {
 		fmt.Printf("读取 %s 失败: %v\n", GreenDirConfigFile, err)
 		os.Exit(1)
 	}
-	defer file.Close()
 
-	decoder := json.NewDecoder(file)
-	if err := decoder.Decode(&greenDirConfig); err != nil {
+	// 解析 TOML
+	if err := toml.Unmarshal(fileContent, &greenDirConfig); err != nil {
 		fmt.Printf("解析 %s 失败: %v\n", GreenDirConfigFile, err)
 		os.Exit(1)
 	}
@@ -542,6 +545,7 @@ func startEnvironment(targetPath string) {
 	clinkPath := filepath.Join(myBinPath, "sub_clink", "clink.bat")
 	if _, err := os.Stat(clinkPath); err == nil {
 		fmt.Println("正在启动 Clink 增强命令行...")
+		fmt.Println()
 
 		cmd := exec.Command("cmd.exe", "/k", clinkPath, "inject", "--quiet")
 		cmd.Env = os.Environ()

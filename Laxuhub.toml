@@ -1,0 +1,90 @@
+version = "1.1"
+
+# ========================================
+# 自定义环境配置示例 (Custom Environment)
+# ========================================
+# 这个模块展示了如何添加新的语言/工具环境
+# 复制这个表格块并修改相关配置即可添加新环境
+
+[environments.custom]
+# 显示名称（在菜单中显示给用户）
+display_name = "custom"
+# 基础目录（相对于 Laxuhub 根目录）
+base_dir = "green_custom"
+# 要添加到 PATH 的子目录（空字符串表示根目录）
+path_dirs = ["", "bin"]
+# 目录名前缀匹配（用于自动发现版本）
+searchprefix_string = ["custom"]
+
+[environments.custom.env_vars]
+# 环境变量设置，{full_path} 在程序中会被替换为path_dirs完整路径
+CUSTOM_HOME = "{full_path}"
+
+# ========================================
+# Python 环境配置
+# ========================================
+
+[environments.python]
+display_name = "Python"
+base_dir = "green_python"
+path_dirs = ["", "Scripts"]
+searchprefix_string = ["python", "cpython"]
+
+[environments.python.env_vars]
+PYTHON_HOME = "{full_path}"
+UV_CACHE_DIR = "{full_path}/../../data/cache/uv"
+
+# ========================================
+# nodejs 环境配置
+# ========================================
+
+[environments.node]
+display_name = "Node.js"
+base_dir = "green_node"
+path_dirs = [""]
+searchprefix_string = ["node", "nodejs"]
+
+[environments.node.env_vars]
+NODE_HOME = "{full_path}"
+
+# ========================================
+# go 环境配置
+# ========================================
+
+[environments.go]
+display_name = "Go"
+base_dir = "green_go"
+path_dirs = ["bin"]
+searchprefix_string = ["go", "golang"]
+
+[environments.go.env_vars]
+GO_ROOT = "{full_path}"
+GO_HOME = "{full_path}/bin"
+
+# ========================================
+# java 环境配置
+# ========================================
+
+[environments.java]
+display_name = "Java"
+base_dir = "green_java"
+path_dirs = ["bin"]
+searchprefix_string = ["java", "jdk", "openjdk", "jre"]
+
+[environments.java.env_vars]
+JAVA_ROOT = "{full_path}"
+JAVA_HOME = "{full_path}/bin"
+
+# ========================================
+# rust 环境配置
+# ========================================
+
+[environments.rust]
+display_name = "Rust"
+base_dir = "green_rust"
+path_dirs = ["cargo/bin", "rustc/bin"]
+searchprefix_string = ["rust"]
+
+[environments.rust.env_vars]
+RUSTFLAGS = "--sysroot={full_path}/rust-std-x86_64-pc-windows-msvc"
+CARGO_HOME = "{full_path}/../../data/cargo"
