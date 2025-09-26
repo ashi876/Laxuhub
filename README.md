@@ -29,7 +29,7 @@ LaxuHub 使用说明
 
 	LaxuHub/ 
 	├── LaxuHub.exe # 主程序 
-	├── green_dir.json # 环境配置（必需） 
+	├── laxuhub.toml # 环境配置（必需） 
 	├── mybin/ # 工具目录 
 	│ ├── cn_mirror.bat # 镜像源设置脚本 
 	│ └── sub_*/ # 工具子目录（如sub_clink） 
@@ -39,8 +39,8 @@ LaxuHub 使用说明
 	│ ├── python3.10/ # Python 3.10版本 
 	│ └── python3.11/ # Python 3.11版本 
 	├── green_node/ # Node.js环境 
-	│ ├── node16/ # Node.js 16版本 
-	│ └── node18/ # Node.js 18版本 
+	│ ├── node20/ # Node.js 16版本 
+	│ └── node22/ # Node.js 18版本 
 	├── green_go/ # Go环境 
 	├── green_java/ # Java环境 
 	└── green_rust/ # Rust环境 
@@ -67,7 +67,7 @@ LaxuHub 使用说明
 
 用户可定义用于扩展新语言留下的三重接口:
 
-	green_dir.json + green_XX 目录：
+	laxuhub.toml + green_XX 目录：
 		
 		作用：定义如何集成一个复杂的、需要特殊环境变量和路径设置的正式语言环境（如 Python, Java, Go）。
 		扩展方式：任何新语言，只要遵循在 json 中定义配置、在对应 green_xxx 目录下放置发行版的规则，就能被自动识别和集成。
@@ -101,13 +101,8 @@ LaxuHub 使用说明
 
 主环境配置 
 
-	配置文件：green_dir.json（程序自带，按需添加环境）
+	配置文件：laxuhub.toml（程序自带，按需添加环境）
 	添加新环境：参考已有格式添加新语言配置
-	配置包含：
-		基础目录（如 green_python）
-		PATH子目录（如 ["", "Scripts"]）
-		环境变量（如 PYTHON_HOME）
-		版本匹配模式（如 "python"）匹配green_python目录内"python"开头的子目录
 	
 特性 
 
@@ -121,10 +116,10 @@ LaxuHub 使用说明
 
 注意事项 
 
--   **配置更新**：修改 `green_dir.json` 后需重启 LaxuHub 程序生效。
--   **Python pip 路径问题**：Python 的 `pip` 工具官方写死绝对路径。如果 LaxuHub 的安装目录**不是** `D:\` 根目录，在首次使用 Python 环境后，需要重置 `pip` 以避免后续使用中出现路径错误。
+-   **配置更新**：修改 `laxuhub.toml` 后需重启 LaxuHub 程序生效。
+-   **Python pip 路径问题**：Python 的 `pip` 工具官方写死绝对路径。如果 LaxuHub 的安装目录**不是** `D:\` 根目录，在首次使用 Python 环境后，需要重置 `pip` 以避免后续使用中出现路径错误。推荐方案2~
     -   **解决方案1**：程序包提供了 `pipreset.bat` (重置) 和 `pipsafeup.bat` (更新并重置) 两个辅助脚本。可直接按需选一个键入命令运行。
-	-   **解决方案2**：使用pip的更现代化的包管理工具uv.速度更快，而且没写死路径在程序。
+	-   **解决方案2**：mybin内置使用比pip的更现代化的包管理工具uv.速度更快。用uvup.bat更新自身。
 	-   **解决方案3**：用python -m命令调用模块运行pip或其它cli工具
 
 退出环境：关闭启动的命令行窗口即可
