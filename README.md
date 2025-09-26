@@ -39,8 +39,8 @@ LaxuHub 使用说明
 	│ ├── python3.10/ # Python 3.10版本 
 	│ └── python3.11/ # Python 3.11版本 
 	├── green_node/ # Node.js环境 
-	│ ├── node20/ # Node.js 16版本 
-	│ └── node22/ # Node.js 18版本 
+	│ ├── node20/ # Node.js 20版本 
+	│ └── node22/ # Node.js 22版本 
 	├── green_go/ # Go环境 
 	├── green_java/ # Java环境 
 	└── green_rust/ # Rust环境 
@@ -109,7 +109,7 @@ LaxuHub 使用说明
 	✅ 多环境任意组合同时激活（PATH/环境变量自动合并）
 	✅ 防重复选择（同一语言只选一个版本）
 	✅ 镜像源自动配置（通过cn_mirror.bat）
-	✅ 语言环境目录自由扩展（通过green_dir.json）
+	✅ 语言环境目录自由扩展（通过laxuhub.toml）
 	✅ 工具目录自由扩展（sub_*子目录）
 	✅ Clink命令行增强（自动检测启用）
 	✅ 工作目录支持（启动时自动切换）
