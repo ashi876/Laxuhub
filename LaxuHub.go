@@ -18,7 +18,7 @@ import (
 const (
 	ConfigFileName     = "laxuhub_config.ini"
 	GreenDirConfigFile = "laxuhub.toml" // 修改为 TOML 文件
-	ConfigVersion      = "1.0"
+	ConfigVersion      = "1.1"
 )
 
 type GreenDirConfig struct {
