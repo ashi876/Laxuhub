@@ -1,11 +1,21 @@
 version = "1.1"
 
-# ========================================
-# 自定义环境配置示例 (Custom Environment)
-# ========================================
-# 这个模块展示了如何添加新的语言/工具环境
-# 复制这个表格块并修改相关配置即可添加新环境
+# 系统PATH扩展（用户可选配置，默认空）
+syspath = [
+    "{basePath}/mybin/apache-maven/bin",
+    ""
+]
 
+# 系统变量（必要的）
+[sysvars]
+laxuhub_home = "{basePath}"
+laxuhub_data_dir = "{basePath}/data"
+laxuhub_mybin_dir = "{basePath}/mybin"
+MAVEN_HOME = "{basePath}/mybin/apache-maven"
+
+# ========================================
+# 语言自定义环境配置示例 (Custom Environment)
+# ========================================
 [environments.custom]
 # 显示名称（在菜单中显示给用户）
 display_name = "custom"
@@ -32,7 +42,7 @@ searchprefix_string = ["python", "cpython"]
 
 [environments.python.env_vars]
 PYTHON_HOME = "{full_path}"
-UV_CACHE_DIR = "{full_path}/../../data/cache/uv"
+UV_CACHE_DIR = "{basePath}/data/cache/uv"
 
 # ========================================
 # nodejs 环境配置
@@ -59,7 +69,7 @@ searchprefix_string = ["go", "golang"]
 
 [environments.go.env_vars]
 GO_ROOT = "{full_path}"
-GO_HOME = "{full_path}/bin"
+#GO_HOME = "{full_path}/bin"
 
 # ========================================
 # java 环境配置
@@ -72,7 +82,7 @@ path_dirs = ["bin"]
 searchprefix_string = ["java", "jdk", "openjdk", "jre"]
 
 [environments.java.env_vars]
-JAVA_ROOT = "{full_path}"
+#JAVA_ROOT = "{full_path}"
 JAVA_HOME = "{full_path}"
 
 # ========================================
@@ -87,4 +97,4 @@ searchprefix_string = ["rust"]
 
 [environments.rust.env_vars]
 RUSTFLAGS = "--sysroot={full_path}/rust-std-x86_64-pc-windows-msvc"
-CARGO_HOME = "{full_path}/../../data/cargo"
+CARGO_HOME = "{basePath}/data/cargo"
