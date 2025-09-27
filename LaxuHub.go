@@ -3,7 +3,7 @@ package main
 
 import (
 	"bufio"
-	"net/url" 
+	"net/url"
 	"fmt"
 	"os"
 	"os/exec"
@@ -11,42 +11,55 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	
-	"github.com/pelletier/go-toml/v2" // 新增 TOML 库
+
+	"github.com/pelletier/go-toml/v2"
 )
 
 const (
 	ConfigFileName     = "laxuhub_config.ini"
-	GreenDirConfigFile = "laxuhub.toml" // 修改为 TOML 文件
-	ConfigVersion      = "1.1"
+	GreenDirConfigFile = "laxuhub.toml"
+	ConfigVersion      = "1.0"
 )
 
+// GreenDirConfig 配置结构体
 type GreenDirConfig struct {
-	Version      string                    `toml:"version"` // 修改标签
-	Environments map[string]LanguageConfig `toml:"environments"`
+	Version      string                    `toml:"version"`
+	SysPath      []string                  `toml:"syspath"`       // 系统PATH扩展
+	SysVars      map[string]string         `toml:"sysvars"`       // 系统变量
+	Environments map[string]LanguageConfig `toml:"environments"`  // 环境配置
 }
 
+// LanguageConfig 语言环境配置
 type LanguageConfig struct {
-    DisplayName       string            `toml:"display_name"`
-    BaseDir           string            `toml:"base_dir"`
-    PathDirs          []string          `toml:"path_dirs"`
-    EnvVars           map[string]string `toml:"env_vars"`
-    SearchPrefixString []string         `toml:"searchprefix_string"`
+	DisplayName       string            `toml:"display_name"`        // 显示名称
+	BaseDir           string            `toml:"base_dir"`            // 基础目录
+	PathDirs          []string          `toml:"path_dirs"`           // PATH目录
+	EnvVars           map[string]string `toml:"env_vars"`            // 环境变量
+	SearchPrefixString []string         `toml:"searchprefix_string"` // 搜索前缀
 }
 
 var (
-	basePath               string
-	configLastEnvironments []string
-	availableEnvironments  map[string][]string
-	selectedEnvironments   []string
-	myBinPath              string
-	myBinSubPaths          []string
-	greenDirConfig         GreenDirConfig
+	basePath               string                  // 基础路径
+	configLastEnvironments []string                // 上次配置的环境
+	availableEnvironments  map[string][]string     // 可用环境
+	selectedEnvironments   []string                // 选择的环境
+	myBinPath              string                  // mybin路径
+	myBinSubPaths          []string                // mybin子路径
+	greenDirConfig         GreenDirConfig          // TOML配置
 )
 
 func main() {
-	// 获取基础路径
+	// 第一步：获取基础路径并设置 laxuhub_home
 	basePath = getBasePath()
+	os.Setenv("laxuhub_home", basePath)
+
+	// 第二步：加载绿色目录配置
+	loadGreenDirConfig()
+
+	// 第三步：设置系统变量和系统PATH
+	setupSystemVarsAndPath()
+
+	// 原有逻辑继续...
 	myBinPath = filepath.Join(basePath, "mybin")
 
 	// 解析命令行参数
@@ -66,15 +79,11 @@ func main() {
 	if targetPath != "" {
 		if _, err := os.Stat(targetPath); err == nil {
 			os.Chdir(targetPath)
-			//fmt.Printf("工作目录设置为: %s\n", targetPath)
 		} else {
 			fmt.Printf("警告: 路径 '%s' 不存在，使用当前目录\n", targetPath)
 			targetPath = ""
 		}
 	}
-
-	// 加载绿色目录配置
-	loadGreenDirConfig()
 
 	// 发现可用环境
 	discoverEnvironments()
@@ -119,6 +128,73 @@ func main() {
 	startEnvironment(targetPath)
 }
 
+// setupSystemVarsAndPath 设置系统变量和系统PATH
+func setupSystemVarsAndPath() {
+	// 设置系统变量
+	for key, value := range greenDirConfig.SysVars {
+		replacedValue := replaceVariables(value)
+		os.Setenv(key, replacedValue)
+		fmt.Printf("[系统变量] %s=%s\n", key, replacedValue)
+	}
+
+	// 设置系统PATH
+	if len(greenDirConfig.SysPath) > 0 {
+		currentPath := os.Getenv("PATH")
+		newPath := currentPath
+
+		for _, pathItem := range greenDirConfig.SysPath {
+			if strings.TrimSpace(pathItem) == "" {
+				continue // 跳过空路径
+			}
+			fullPath := replaceVariables(pathItem)
+			// 确保路径是绝对路径
+			if !filepath.IsAbs(fullPath) {
+				fullPath = filepath.Join(basePath, fullPath)
+			}
+			newPath = fullPath + string(os.PathListSeparator) + newPath
+			fmt.Printf("[系统PATH] 添加: %s\n", fullPath)
+		}
+
+		os.Setenv("PATH", newPath)
+	}
+}
+
+// replaceVariables 变量替换函数
+func replaceVariables(input string) string {
+    result := input
+    maxIterations := 5 // 安全限制，防止无限循环
+    
+    for i := 0; i < maxIterations; i++ {
+        oldResult := result
+        
+        // 替换基础路径
+        result = strings.Replace(result, "{basePath}", basePath, -1)
+        
+        // 替换环境变量
+        for _, env := range os.Environ() {
+            if parts := strings.SplitN(env, "=", 2); len(parts) == 2 {
+                placeholder := "{" + parts[0] + "}"
+                if strings.Contains(result, placeholder) {
+                    result = strings.Replace(result, placeholder, parts[1], -1)
+                }
+            }
+        }
+        
+        // 如果没有变化，提前退出
+        if result == oldResult {
+            break
+        }
+        
+        // 最后一次迭代给出警告
+        if i == maxIterations-1 && result != oldResult {
+            fmt.Printf("警告: 变量替换可能未完成，结果: %s\n", result)
+        }
+    }
+    
+    return result
+}
+
+// getBasePath 获取基础路径
 func getBasePath() string {
 	if basePath != "" {
 		return basePath
@@ -132,6 +208,7 @@ func getBasePath() string {
 	return filepath.Dir(exePath)
 }
 
+// loadGreenDirConfig 加载TOML配置
 func loadGreenDirConfig() {
 	configPath := filepath.Join(basePath, GreenDirConfigFile)
 
@@ -140,24 +217,34 @@ func loadGreenDirConfig() {
 		os.Exit(1)
 	}
 
-	// 读取 TOML 文件内容
+	// 读取TOML文件内容
 	fileContent, err := os.ReadFile(configPath)
 	if err != nil {
 		fmt.Printf("读取 %s 失败: %v\n", GreenDirConfigFile, err)
 		os.Exit(1)
 	}
 
-	// 解析 TOML
+	// 解析TOML
 	if err := toml.Unmarshal(fileContent, &greenDirConfig); err != nil {
 		fmt.Printf("解析 %s 失败: %v\n", GreenDirConfigFile, err)
 		os.Exit(1)
 	}
+
+	// 初始化空的配置项（如果不存在）
+	if greenDirConfig.SysPath == nil {
+		greenDirConfig.SysPath = []string{}
+	}
+	if greenDirConfig.SysVars == nil {
+		greenDirConfig.SysVars = make(map[string]string)
+	}
 }
 
+// discoverEnvironments 发现可用环境
 func discoverEnvironments() {
 	availableEnvironments = make(map[string][]string)
 
 	for langKey, langConfig := range greenDirConfig.Environments {
+		// 使用相对路径（保持兼容）
 		langDir := filepath.Join(basePath, langConfig.BaseDir)
 
 		if _, err := os.Stat(langDir); os.IsNotExist(err) {
@@ -212,6 +299,7 @@ func discoverEnvironments() {
 	}
 }
 
+// loadConfig 加载用户配置
 func loadConfig() {
 	configPath := filepath.Join(basePath, ConfigFileName)
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
@@ -245,6 +333,7 @@ func loadConfig() {
 	}
 }
 
+// saveConfig 保存用户配置
 func saveConfig() {
 	configPath := filepath.Join(basePath, ConfigFileName)
 	file, err := os.Create(configPath)
@@ -257,7 +346,7 @@ func saveConfig() {
 	// 对目录名进行URL编码，处理空格和特殊字符
 	var encodedEnvs []string
 	for _, env := range selectedEnvironments {
-		encoded := url.QueryEscape(env) // 使用URL编码
+		encoded := url.QueryEscape(env)
 		encodedEnvs = append(encodedEnvs, encoded)
 	}
 
@@ -266,6 +355,7 @@ func saveConfig() {
 	file.WriteString(content)
 }
 
+// showQuickStartMenu 显示快速启动菜单
 func showQuickStartMenu() {
 	fmt.Println()
 	fmt.Println("   ================================")
@@ -291,6 +381,7 @@ func showQuickStartMenu() {
 	showEnvironmentSelection()
 }
 
+// showEnvironmentSelection 显示环境选择菜单
 func showEnvironmentSelection() {
 	maxRetries := 5
 
@@ -383,6 +474,7 @@ func showEnvironmentSelection() {
 	}
 }
 
+// setupSelectedEnvironments 设置选择的环境
 func setupSelectedEnvironments(envs []string) {
 	fmt.Println()
 	fmt.Println("   ================================")
@@ -421,7 +513,9 @@ func setupSelectedEnvironments(envs []string) {
 		fullPath := filepath.Join(basePath, langConfig.BaseDir, version)
 
 		for envVar, valueTemplate := range langConfig.EnvVars {
-			value := strings.Replace(valueTemplate, "{full_path}", fullPath, -1)
+			// 对环境变量值进行变量替换
+			value := replaceVariables(valueTemplate)
+			value = strings.Replace(value, "{full_path}", fullPath, -1)
 			os.Setenv(envVar, value)
 		}
 
@@ -437,6 +531,7 @@ func setupSelectedEnvironments(envs []string) {
 	os.Setenv("PATH", newPath)
 }
 
+// showEnvironmentInfo 显示环境信息
 func showEnvironmentInfo() {
 	fmt.Println()
 	fmt.Println("================================")
@@ -466,6 +561,7 @@ func showEnvironmentInfo() {
 	fmt.Println("================================")
 }
 
+// applyBatchFileEnvVars 应用批处理文件的环境变量
 func applyBatchFileEnvVars(batchFile string) error {
 	originalEnv := getCurrentEnvMap()
 
@@ -477,12 +573,12 @@ func applyBatchFileEnvVars(batchFile string) error {
 
 	newEnv := parseEnvOutput(string(output))
 
-	// 新增：按字母顺序排序
+	// 按字母顺序排序
 	var keys []string
 	for key := range newEnv {
 		keys = append(keys, key)
 	}
-	sort.Strings(keys) // 按字母排序
+	sort.Strings(keys)
 
 	// 按排序后的顺序遍历
 	for _, key := range keys {
@@ -496,7 +592,7 @@ func applyBatchFileEnvVars(batchFile string) error {
 	return nil
 }
 
-// 辅助函数：获取当前环境变量的map
+// getCurrentEnvMap 获取当前环境变量的map
 func getCurrentEnvMap() map[string]string {
 	envMap := make(map[string]string)
 	for _, env := range os.Environ() {
@@ -507,7 +603,7 @@ func getCurrentEnvMap() map[string]string {
 	return envMap
 }
 
-// 辅助函数：解析 set 命令的输出
+// parseEnvOutput 解析 set 命令的输出
 func parseEnvOutput(output string) map[string]string {
 	envMap := make(map[string]string)
 	lines := strings.Split(output, "\n")
@@ -526,6 +622,7 @@ func parseEnvOutput(output string) map[string]string {
 	return envMap
 }
 
+// startEnvironment 启动环境
 func startEnvironment(targetPath string) {
 	fmt.Println()
 
@@ -578,6 +675,7 @@ func startEnvironment(targetPath string) {
 	}
 }
 
+// cleanupClinkTempFiles 清理Clink临时文件
 func cleanupClinkTempFiles(tempDir string) {
 	pattern := filepath.Join(tempDir, "clink_errorlevel_*.txt")
 	files, err := filepath.Glob(pattern)
