@@ -73,7 +73,7 @@ searchprefix_string = ["java", "jdk", "openjdk", "jre"]
 
 [environments.java.env_vars]
 JAVA_ROOT = "{full_path}"
-JAVA_HOME = "{full_path}/bin"
+JAVA_HOME = "{full_path}"
 
 # ========================================
 # rust 环境配置
