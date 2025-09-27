@@ -18,7 +18,7 @@ import (
 const (
 	ConfigFileName     = "laxuhub_config.ini"
 	GreenDirConfigFile = "laxuhub.toml"
-	ConfigVersion      = "1.0"
+	ConfigVersion      = "1.2"
 )
 
 // GreenDirConfig 配置结构体
