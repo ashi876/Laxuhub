@@ -125,3 +125,8 @@ LaxuHub 使用说明
 退出环境：关闭启动的命令行窗口即可
 
 作者: 千城真人 b站_碎辰a
+
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
