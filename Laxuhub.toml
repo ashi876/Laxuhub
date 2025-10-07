@@ -9,8 +9,6 @@ syspath = [
 # 系统变量（必要的）
 [sysvars]
 laxuhub_home = "{basePath}"
-laxuhub_data_dir = "{basePath}/data"
-laxuhub_mybin_dir = "{basePath}/mybin"
 MAVEN_HOME = "{basePath}/mybin/apache-maven"
 
 # ========================================
