@@ -61,7 +61,7 @@ def detect_system_info():
 def get_github_releases(major_version):
     """从GitHub获取release信息"""
     try:
-        url = f"https://api.github.com/repos/adoptium/temurin{major_version}-binaries/releases"
+        url = f"https://api.github.com/repos/adoptium/temurin{major_version}-binaries/releases?per_page=1"
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
             'Accept': 'application/vnd.github.v3+json'
