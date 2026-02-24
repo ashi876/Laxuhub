@@ -2,12 +2,21 @@
 # -*- coding: utf-8 -*-
 
 import urllib.request
+import urllib.error
 import json
 import subprocess
 import re
 import platform
 import os
 import sys
+import ssl
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+# 创建不验证证书的SSL上下文
+ssl_context = ssl.create_default_context()
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
 
 def get_current_java_version():
     """获取当前安装的Java版本"""
@@ -30,7 +39,6 @@ def get_current_java_version():
                 if '+' in version and '-LTS' not in version:
                     version += '-LTS'
                 return version
-        
         return None
     except (subprocess.CalledProcessError, FileNotFoundError):
         return None
@@ -58,179 +66,163 @@ def detect_system_info():
     
     return os_type, arch
 
-def get_github_releases(major_version):
-    """从GitHub获取release信息"""
+def make_request(url):
+    """发送HTTP请求"""
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+    }
+    
+    req = urllib.request.Request(url, headers=headers)
+    with urllib.request.urlopen(req, timeout=15, context=ssl_context) as response:
+        return response.read().decode('utf-8')
+
+def fetch_version_info(major, lts_releases):
+    """并发获取单个版本的信息"""
     try:
-        url = f"https://api.github.com/repos/adoptium/temurin{major_version}-binaries/releases?per_page=1"
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            'Accept': 'application/vnd.github.v3+json'
+        asset_url = f"https://api.adoptium.net/v3/assets/latest/{major}/hotspot"
+        asset_data = json.loads(make_request(asset_url))
+        
+        if not asset_data:
+            return None
+        
+        first_item = asset_data[0]
+        
+        # 正确的版本号获取
+        version_info = first_item.get('version', {})
+        version_str = version_info.get('openjdk_version', '')
+        
+        if not version_str:
+            version_str = version_info.get('semver', '')
+        
+        # 格式化版本号
+        if version_str:
+            if major in lts_releases and '-LTS' not in version_str:
+                full_version = f"{version_str}-LTS"
+            else:
+                full_version = version_str
+        else:
+            full_version = f"JDK {major}"
+        
+        # 收集所有assets
+        assets = []
+        for item in asset_data:
+            binary = item.get('binary', {})
+            package = binary.get('package', {})
+            if package:
+                image_type = binary.get('image_type', '')
+                if image_type == 'jdk' or image_type == 'jre':
+                    assets.append({
+                        'name': package.get('name', ''),
+                        'url': package.get('link', ''),
+                        'size': package.get('size', 0),
+                        'os': binary.get('os', ''),
+                        'arch': binary.get('architecture', ''),
+                        'image_type': image_type
+                    })
+        
+        # 发布日期
+        release_date = first_item.get('release_date', '')[:10]
+        if not release_date:
+            release_date = first_item.get('timestamp', '')[:10]
+        
+        return {
+            'version': full_version,
+            'major_version': major,
+            'lts': major in lts_releases,
+            'lts_name': f'JDK {major}' if major in lts_releases else '',
+            'date': release_date,
+            'assets': assets,
+            'tag_name': first_item.get('release_name', '')
         }
         
-        req = urllib.request.Request(url, headers=headers)
-        with urllib.request.urlopen(req) as response:
-            data = json.loads(response.read().decode('utf-8'))
-        
-        versions = []
-        for release in data:
-            tag_name = release['tag_name']
-            version_match = None
-            
-            # 适配不同版本的tag_name格式
-            if major_version == 8:
-                # JDK 8格式: jdk8u462-b08
-                version_match = re.search(r'jdk8u(\d+)-b(\d+)', tag_name)
-                if version_match:
-                    update_version = version_match.group(1)  # 如462
-                    build_number = version_match.group(2)    # 如08
-                    full_version = f"1.8.0_{update_version}+b{build_number}"
-            else:
-                # JDK 11+ 格式: jdk-11.0.20+8
-                version_match = re.search(r'jdk-([\d\.]+)\+(\d+)', tag_name)
-                if version_match:
-                    base_version = version_match.group(1)
-                    build_number = version_match.group(2)
-                    full_version = f"{base_version}+{build_number}-LTS"
-            
-            if version_match:
-                # 获取assets文件信息
-                assets = []
-                for asset in release['assets']:
-                    assets.append({
-                        'name': asset['name'],
-                        'url': asset['browser_download_url'],
-                        'size': asset['size']
-                    })
-                
-                versions.append({
-                    'version': full_version,
-                    'major_version': major_version,
-                    'tag_name': tag_name,
-                    'date': release['published_at'][:10],
-                    'assets': assets
-                })
-        
-        return versions
     except Exception as e:
-        print(f"获取JDK {major_version} releases失败: {e}")
-        return []
+        return {
+            'version': f"JDK {major}",
+            'major_version': major,
+            'lts': major in lts_releases,
+            'lts_name': f'JDK {major}' if major in lts_releases else '',
+            'date': '',
+            'assets': [],
+            'tag_name': ''
+        }
 
 def get_java_versions():
-    """获取所有可用的Java版本"""
-    print("正在从GitHub获取Java版本列表...")
+    """从Adoptium API获取所有可用的Java版本"""
+    print("正在从Adoptium API获取Java版本列表...")
     
-    versions = []
-    lts_versions = [8, 11, 17, 21, 25]
-    
-    for major_version in lts_versions:
-        print(f"获取JDK {major_version}版本...")
-        releases = get_github_releases(major_version)
-        if releases:
-            # 只取最新版本
-            latest_release = releases[0]
-            versions.append({
-                'version': latest_release['version'],
-                'major_version': major_version,
-                'lts': True,
-                'lts_name': f'JDK {major_version}',
-                'date': latest_release['date'],
-                'assets': latest_release['assets'],
-                'tag_name': latest_release['tag_name']
-            })
-            print(f"JDK {major_version}最新版本: {latest_release['version']}")
-        else:
-            print(f"JDK {major_version}无可用版本")
-    
-    # 按主版本号排序
-    versions.sort(key=lambda x: x['major_version'], reverse=True)
-    return versions
+    try:
+        # 1. 先获取所有可用版本
+        info_url = "https://api.adoptium.net/v3/info/available_releases"
+        info_data = json.loads(make_request(info_url))
+        
+        available_releases = info_data.get('available_releases', [])
+        lts_releases = set(info_data.get('available_lts_releases', []))
+        
+        print(f"找到 {len(available_releases)} 个Java版本")
+        print("正在获取版本详细信息...")
+        
+        # 2. 并发获取每个版本的信息
+        versions = []
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            future_to_major = {
+                executor.submit(fetch_version_info, major, lts_releases): major 
+                for major in available_releases
+            }
+            
+            completed = 0
+            total = len(available_releases)
+            
+            for future in as_completed(future_to_major):
+                major = future_to_major[future]
+                try:
+                    result = future.result(timeout=10)
+                    if result:
+                        versions.append(result)
+                    completed += 1
+                    # 单行刷新进度
+                    bar_length = 30
+                    filled = int(bar_length * completed / total)
+                    bar = '=' * filled + '-' * (bar_length - filled)
+                    print(f"\r进度: [{bar}] {completed}/{total}", end='', flush=True)
+                except Exception as e:
+                    completed += 1
+                    print(f"\nJDK {major} 处理失败: {e}")
+        
+        print("\n")  # 换行
+        
+        # 按主版本号从大到小排序
+        versions.sort(key=lambda x: x['major_version'], reverse=True)
+        print(f"成功获取 {len(versions)} 个Java版本")
+        
+        return versions
+        
+    except Exception as e:
+        print(f"获取版本列表失败: {e}")
+        return []
 
 def find_matching_asset(assets, os_type, arch):
     """查找匹配系统架构的asset"""
-    # 优先匹配的文件命名模式 - 按优先级排序
-    priority_patterns = [
-        # 最高优先级: 标准JDK安装包 (非debugimage)
-        {
-            'windows': {
-                'x64': r'OpenJDK\d+U-jdk_x64_windows_hotspot_[\da-zA-Z]+\.zip',
-                'aarch64': r'OpenJDK\d+U-jdk_aarch64_windows_hotspot_[\da-zA-Z]+\.zip'
-            },        
-            'mac': {
-                'x64': r'OpenJDK\d+U-jdk_x64_mac_hotspot_[\da-zA-Z]+\.tar\.gz',
-                'aarch64': r'OpenJDK\d+U-jdk_aarch64_mac_hotspot_[\da-zA-Z]+\.tar\.gz'
-            },
-            'linux': {
-                'x64': r'OpenJDK\d+U-jdk_x64_linux_hotspot_[\da-zA-Z]+\.tar\.gz',
-                'aarch64': r'OpenJDK\d+U-jdk_aarch64_linux_hotspot_[\da-zA-Z]+\.tar\.gz'
-            }
-        }
-    ]
+    if not assets:
+        return None
     
-    # 排除debugimage、sources、debug等非标准安装包
-    exclude_patterns = [
-        r'debugimage', r'sources', r'debug', r'sbom', 
-        r'json', r'sha256', r'sig', r'metadata', r'aqavit'
-    ]
-    
-    # 按优先级查找匹配的asset
-    for priority_set in priority_patterns:
-        if os_type in priority_set and arch in priority_set[os_type]:
-            pattern = priority_set[os_type][arch]
-            for asset in assets:
-                # 排除非安装包文件
-                if any(exclude in asset['name'].lower() for exclude in exclude_patterns):
-                    continue
-                    
-                if re.search(pattern, asset['name'], re.IGNORECASE):
-                    print(f"✅ 找到JDK安装包: {asset['name']}")
+    # 优先找JDK，没有的话找JRE
+    for image_type in ['jdk', 'jre']:
+        for asset in assets:
+            if asset.get('image_type') == image_type:
+                if asset['os'] == os_type and asset['arch'] == arch:
                     return asset
     
-    # 如果上面的匹配失败，尝试更宽松的匹配
-    print("尝试宽松匹配...")
+    # 宽松匹配
     for asset in assets:
-        # 排除非安装包文件
-        if any(exclude in asset['name'].lower() for exclude in exclude_patterns):
-            continue
-            
-        # 宽松匹配：包含jdk、windows、x64/hotspot，且是压缩包或安装包
-        if ('jdk' in asset['name'].lower() and 
-            'windows' in asset['name'].lower() and 
-            ('x64' in asset['name'].lower() or 'x86_64' in asset['name'].lower()) and
-            any(ext in asset['name'].lower() for ext in ['.zip', '.tar.gz'])):
-            print(f"✅ 通过宽松匹配找到JDK安装包: {asset['name']}")
+        if (asset['os'] == os_type and 
+            asset['arch'] == arch and
+            any(ext in asset['name'] for ext in ['.zip', '.tar.gz', '.msi', '.pkg'])):
             return asset
-    
-    # 如果还找不到，显示相关文件
-    print("未找到标准JDK安装包，相关文件列表:")
-    relevant_files = []
-    for asset in assets:
-        if any(exclude in asset['name'].lower() for exclude in exclude_patterns):
-            continue
-            
-        if ('windows' in asset['name'].lower() and
-            ('x64' in asset['name'].lower() or 'x86_64' in asset['name'].lower())):
-            relevant_files.append(asset)
-    
-    if relevant_files:
-        for i, asset in enumerate(relevant_files[:10], 1):
-            file_type = "JDK" if "jdk" in asset['name'].lower() else "JRE" if "jre" in asset['name'].lower() else "其他"
-            print(f"  {i}. [{file_type}] {asset['name']}")
-        
-        # 自动选择第一个JDK文件
-        for asset in relevant_files:
-            if "jdk" in asset['name'].lower():
-                print(f"✅ 自动选择JDK安装包: {asset['name']}")
-                return asset
-        
-        # 如果没有JDK，选择第一个文件
-        if relevant_files:
-            print(f"✅ 自动选择: {relevant_files[0]['name']}")
-            return relevant_files[0]
     
     return None
 
 def download_file(url, filename):
-    """下载文件"""
+    """下载文件 - 修复进度显示"""
     try:
         print(f"正在下载: {url}")
         print(f"保存到: {filename}")
@@ -239,9 +231,26 @@ def download_file(url, filename):
             downloaded = block_num * block_size
             if total_size > 0:
                 percent = min(100, (downloaded / total_size) * 100)
-                print(f"\r进度: {percent:.1f}% ({downloaded}/{total_size})", end="", flush=True)
+                # 修复：只显示百分比和已下载量，不重复显示total_size
+                print(f"\r进度: {percent:.1f}% ({downloaded} / {total_size} bytes)", end="", flush=True)
         
-        urllib.request.urlretrieve(url, filename, report_progress)
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+        req = urllib.request.Request(url, headers=headers)
+        
+        with urllib.request.urlopen(req, timeout=30, context=ssl_context) as response:
+            with open(filename, 'wb') as f:
+                total_size = int(response.headers.get('Content-Length', 0))
+                block_num = 0
+                chunk_size = 8192
+                
+                while True:
+                    chunk = response.read(chunk_size)
+                    if not chunk:
+                        break
+                    f.write(chunk)
+                    block_num += 1
+                    report_progress(block_num, chunk_size, total_size)
+        
         print("\n下载完成!")
         return True
     except Exception as e:
@@ -251,25 +260,34 @@ def download_file(url, filename):
 def display_versions(versions, current_version, page, total_pages):
     """显示版本列表"""
     print(f"\nJava版本列表 (第 {page}/{total_pages} 页):")
-    print("=" * 60)
-    print(f"{'编号':<4} {'版本号':<20} {'发布日期':<12}")
-    print("-" * 60)
+    print("=" * 80)
+    print(f"{'编号':<4} {'版本号':<35} {'LTS状态':<15} {'发布日期':<12}")
+    print("-" * 80)
     
     for i, ver in enumerate(versions, 1):
-        marker = " ← 当前" if current_version and current_version.startswith(str(ver['major_version'])) else ""
+        version = ver['version']
+        lts_status = f"LTS: {ver['lts_name']}" if ver['lts'] else "非LTS"
+        
+        markers = []
+        if current_version and current_version.startswith(str(ver['major_version'])):
+            markers.append("当前")
         if i == 1 and page == 1:
-            marker = " ← 最新" + marker.replace("←", "")
-        print(f"{i:<4} {ver['version']:<19} {ver['date']:<12}{marker}")
+            markers.append("最新")
+        marker_str = " <-" + ",".join(markers) if markers else ""
+        
+        date_str = ver['date'] if ver['date'] else "未知"
+        
+        print(f"{i:<4} {version:<35} {lts_status:<15} {date_str:<12}{marker_str}")
     
-    print("-" * 60)
+    print("-" * 80)
 
 def get_simple_input():
-    """简化输入处理，只支持左右箭头和数字"""
+    """简化输入处理"""
     if sys.platform == "win32":
         import msvcrt
         try:
             key = msvcrt.getch()
-            if key == b'\xe0':  # 扩展键
+            if key == b'\xe0':
                 key = msvcrt.getch()
                 if key == b'K': return 'left'
                 if key == b'M': return 'right'
@@ -311,6 +329,7 @@ def check_java_updates():
     versions = get_java_versions()
     if not versions:
         print("无法获取版本列表")
+        input("\n按回车键退出...")
         return
     
     page_size = 20
@@ -323,7 +342,7 @@ def check_java_updates():
         page_versions = versions[start_idx:end_idx]
         
         display_versions(page_versions, current_version, current_page, total_pages)
-        print("\n导航: ← 上一页 → 下一页 | 输入编号选择版本 | q 退出")
+        print("\n导航: 左箭头上一页 右箭头下一页 输入编号选择版本 q退出")
         print("请选择: ", end="", flush=True)
         
         choice = get_simple_input()
@@ -337,36 +356,36 @@ def check_java_updates():
         elif choice == 'right':
             current_page = current_page + 1 if current_page < total_pages else 1
         elif choice and choice.isdigit():
+            print(choice)  # 显示输入的数字
             idx = int(choice) - 1
             if 0 <= idx < len(page_versions):
                 selected = page_versions[idx]
                 os_type, arch = detect_system_info()
                 print(f"系统: {os_type}, 架构: {arch}")
                 
-                # 显示所有可用的assets用于调试
-                print(f"可用文件列表:")
-                for i, asset in enumerate(selected['assets'][:10], 1):  # 只显示前10个
-                    print(f"  {i}. {asset['name']} ({asset['size']} bytes)")
-                
-                asset = find_matching_asset(selected['assets'], os_type, arch)
-                if asset:
-                    print(f"\n找到匹配文件: {asset['name']}")
-                    print(f"文件大小: {asset['size']} bytes")
-                    print(f"下载链接: {asset['url']}")
-                    
-                    confirm = input("\n确认下载? (y/n): ").lower()
-                    if confirm in ['y', 'yes', '是']:
-                        filename = asset['name']
-                        if download_file(asset['url'], filename):
-                            print(f"下载成功: {filename}")
-                        break
+                if selected['assets']:
+                    asset = find_matching_asset(selected['assets'], os_type, arch)
+                    if asset:
+                        print(f"\n找到匹配文件: {asset['name']}")
+                        print(f"下载链接: {asset['url']}")
+                        
+                        confirm = input("\n确认下载? (y/n): ").lower()
+                        if confirm in ['y', 'yes', '是']:
+                            filename = asset['name']
+                            if download_file(asset['url'], filename):
+                                print(f"下载成功: {filename}")
+                            break
+                    else:
+                        print("\n未找到匹配的安装包")
+                        print(f"可用的平台: {set((a['os'], a['arch']) for a in selected['assets'])}")
                 else:
-                    print("\n未找到匹配的安装包")
-                    print(f"请手动下载: https://github.com/adoptium/temurin{selected['major_version']}-binaries/releases")
+                    print("\n该版本没有可用的下载文件")
             else:
                 print("编号无效")
         else:
             print("输入无效")
+    
+    input("\n按回车键退出...")
 
 if __name__ == "__main__":
     check_java_updates()
