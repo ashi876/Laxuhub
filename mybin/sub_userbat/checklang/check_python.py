@@ -15,9 +15,17 @@ import ssl
 from typing import List, Tuple, Dict
 from collections import defaultdict
 
-# 配置
+# ==================== 配置区域 ====================
 INDEX_URL = "https://mise-versions.jdx.dev/tools/python-precompiled-x86_64-pc-windows-msvc.gz"
 TIMEOUT = 30
+
+# 备用 GitHub 镜像列表（仅用于显示，脚本仍使用直链下载）
+GITHUB_MIRRORS = [
+    "https://gh-proxy.org/",      # 用户已验证可用的代理
+    "https://gh-proxy.org/",
+    # 可自行增删，不影响脚本核心功能
+]
+# =================================================
 
 # 处理 SSL 证书问题（Windows 上有时需要）
 ssl_context = ssl.create_default_context()
@@ -268,6 +276,18 @@ def main():
                 
                 # 构建下载 URL
                 download_url = f"https://github.com/astral-sh/python-build-standalone/releases/download/{date}/{filename}"
+                
+                # 显示文件信息和备用镜像
+                print(f"\n📦 文件信息:")
+                print(f"   文件名: {filename}")
+                print(f"   大小: 待获取")
+                print(f"🔗 直链: {download_url}")
+                
+                # 显示备用镜像地址（仅作为信息展示，不自动使用）
+                if GITHUB_MIRRORS:
+                    print("🪞 备用镜像地址（如直连慢可手动尝试）:")
+                    for i, mirror in enumerate(GITHUB_MIRRORS, 1):
+                        print(f"   {i}. {mirror}{download_url}")
                 
                 # 确认下载
                 confirm = input(f"\n确认下载 Python {ver}? (y/n): ").strip().lower()
