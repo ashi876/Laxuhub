@@ -18,6 +18,8 @@ LaxuHub 使用说明
 		LaxuHub.exe -q 
 	指定工作目录启动 
 		LaxuHub.exe "D:\MyProject" 
+	状态机
+	    laxusave
 
 操作流程 
 
@@ -132,7 +134,7 @@ LaxuHub 使用说明
 
 退出环境：关闭启动的命令行窗口即可
 
-作者: 千城真人 b站_碎辰a
+作者: 千城真人
 
 
 ## License
